@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Building2 } from "lucide-react";
 
 const banks = [
   { id: 'SBIN.NS', name: 'State Bank of India', code: 'SBI' },
@@ -23,13 +24,21 @@ interface BankSelectorProps {
 const BankSelector = ({ onBankChange, selectedBank }: BankSelectorProps) => {
   return (
     <div className="w-full max-w-xs">
+      <div className="flex items-center gap-2 mb-2">
+        <Building2 className="h-5 w-5 text-bank-primary" />
+        <h2 className="text-lg font-semibold text-bank-primary">Select Bank</h2>
+      </div>
       <Select value={selectedBank} onValueChange={onBankChange}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full bg-white border-2 border-blue-100 hover:border-blue-200 transition-colors">
           <SelectValue placeholder="Select a bank" />
         </SelectTrigger>
         <SelectContent>
           {banks.map((bank) => (
-            <SelectItem key={bank.id} value={bank.id}>
+            <SelectItem 
+              key={bank.id} 
+              value={bank.id}
+              className="hover:bg-blue-50 cursor-pointer py-2"
+            >
               {bank.name} ({bank.code})
             </SelectItem>
           ))}

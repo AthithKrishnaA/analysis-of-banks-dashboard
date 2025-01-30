@@ -1,4 +1,5 @@
 import React from 'react';
+import { Card } from "@/components/ui/card";
 
 interface MetricProps {
   label: string;
@@ -7,10 +8,14 @@ interface MetricProps {
 
 const MetricsCard = ({ label, value }: MetricProps) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm">
-      <p className="text-bank-secondary text-sm">{label}</p>
-      <p className="text-bank-primary font-semibold text-lg mt-1">{value}</p>
-    </div>
+    <Card className="bg-gradient-to-br from-white to-blue-50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+      <div className="p-4">
+        <p className="text-bank-secondary text-sm font-medium">{label}</p>
+        <p className="text-bank-primary font-bold text-2xl mt-2 bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent">
+          {value}
+        </p>
+      </div>
+    </Card>
   );
 };
 

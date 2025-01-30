@@ -5,7 +5,6 @@ import MetricsCard from '../components/MetricsCard';
 import BankSelector from '../components/BankSelector';
 import BankMetrics from '../components/BankMetrics';
 
-// Mock data - In a real application, this would come from an API
 const mockBankData = {
   'SBIN.NS': {
     loanData: [
@@ -20,7 +19,6 @@ const mockBankData = {
       semiUrban: 7300,
     },
   },
-  // Add mock data for other banks...
 };
 
 const Index = () => {
@@ -32,30 +30,35 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-4 rounded-lg backdrop-blur-sm">
           <BankSelector onBankChange={handleBankChange} selectedBank={selectedBank} />
         </div>
         
         <Header />
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricsCard label="Previous Close" value="₹613.45" />
           <MetricsCard label="Open" value="₹615.00" />
           <MetricsCard label="Volume" value="12.5M" />
+          <MetricsCard label="Market Cap" value="₹5.53T" />
         </div>
         
-        <StockChart />
+        <div className="bg-white rounded-lg shadow-lg p-4">
+          <StockChart />
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <MetricsCard label="Market Cap" value="₹5.53T" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricsCard label="P/E Ratio" value="12.45" />
           <MetricsCard label="Dividend Yield" value="2.80%" />
-          <MetricsCard label="52 Week Range" value="₹501.85 - ₹629.35" />
+          <MetricsCard label="52 Week High" value="₹629.35" />
+          <MetricsCard label="52 Week Low" value="₹501.85" />
         </div>
 
-        <BankMetrics bankData={mockBankData[selectedBank]} />
+        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
+          <BankMetrics bankData={mockBankData[selectedBank]} />
+        </div>
       </div>
     </div>
   );
