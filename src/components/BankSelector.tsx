@@ -15,7 +15,8 @@ const banks = [
   { id: 'ICICIBANK.NS', name: 'ICICI Bank', code: 'ICICI' },
 ];
 
-interface BankSelectorPropsId: string) => void;
+interface BankSelectorProps {
+  onBankChange: (bankId: string) => void;
   selectedBank: string;
 }
 
