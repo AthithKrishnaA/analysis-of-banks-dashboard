@@ -88,7 +88,7 @@ const Index = () => {
           <BankSelector onBankChange={handleBankChange} selectedBank={selectedBank} />
         </div>
         
-        <Header />
+        <Header selectedBank={selectedBank} />
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricsCard label="Previous Close" value="₹613.45" />
