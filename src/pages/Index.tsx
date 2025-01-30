@@ -19,6 +19,58 @@ const mockBankData = {
       semiUrban: 7300,
     },
   },
+  'AXISBANK.NS': {
+    loanData: [
+      { name: 'Corporate', value: 42 },
+      { name: 'Retail', value: 35 },
+      { name: 'SME', value: 13 },
+      { name: 'Agriculture', value: 10 },
+    ],
+    branchData: {
+      rural: 4200,
+      urban: 5100,
+      semiUrban: 4700,
+    },
+  },
+  'HDFCBANK.NS': {
+    loanData: [
+      { name: 'Corporate', value: 45 },
+      { name: 'Retail', value: 38 },
+      { name: 'SME', value: 12 },
+      { name: 'Agriculture', value: 5 },
+    ],
+    branchData: {
+      rural: 5200,
+      urban: 6800,
+      semiUrban: 5500,
+    },
+  },
+  'KOTAKBANK.NS': {
+    loanData: [
+      { name: 'Corporate', value: 38 },
+      { name: 'Retail', value: 42 },
+      { name: 'SME', value: 14 },
+      { name: 'Agriculture', value: 6 },
+    ],
+    branchData: {
+      rural: 3200,
+      urban: 4500,
+      semiUrban: 3800,
+    },
+  },
+  'ICICIBANK.NS': {
+    loanData: [
+      { name: 'Corporate', value: 40 },
+      { name: 'Retail', value: 37 },
+      { name: 'SME', value: 15 },
+      { name: 'Agriculture', value: 8 },
+    ],
+    branchData: {
+      rural: 5800,
+      urban: 5900,
+      semiUrban: 5200,
+    },
+  },
 };
 
 const Index = () => {
