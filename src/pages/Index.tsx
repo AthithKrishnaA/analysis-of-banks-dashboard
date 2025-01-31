@@ -6,6 +6,7 @@ import BankSelector from '../components/BankSelector';
 import BankMetrics from '../components/BankMetrics';
 import SentimentAnalysis from '../components/SentimentAnalysis';
 import BankComparison from '../components/BankComparison';
+import BankRiskMetrics from '../components/BankRiskMetrics';
 
 const mockBankData = {
   'SBIN.NS': {
@@ -116,6 +117,8 @@ const Index = () => {
             onSentimentUpdate={handleSentimentUpdate}
           />
         </div>
+
+        <BankRiskMetrics selectedBank={selectedBank} />
 
         <SentimentAnalysis 
           selectedBank={selectedBank}
