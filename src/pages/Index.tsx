@@ -4,6 +4,7 @@ import StockChart from '../components/StockChart';
 import MetricsCard from '../components/MetricsCard';
 import BankSelector from '../components/BankSelector';
 import BankMetrics from '../components/BankMetrics';
+import SentimentAnalysis from '../components/SentimentAnalysis';
 
 const mockBankData = {
   'SBIN.NS': {
@@ -75,10 +76,21 @@ const mockBankData = {
 
 const Index = () => {
   const [selectedBank, setSelectedBank] = useState('SBIN.NS');
+  const [sentiment, setSentiment] = useState({ 
+    sentiment: 'Neutral', 
+    emoji: '➖', 
+    color: 'text-gray-500' 
+  });
+  const [priceChanges, setPriceChanges] = useState<number[]>([]);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
     console.log('Selected bank changed:', bankId);
+  };
+
+  const handleSentimentUpdate = (newSentiment: any, changes: number[]) => {
+    setSentiment(newSentiment);
+    setPriceChanges(changes);
   };
 
   return (
@@ -98,8 +110,17 @@ const Index = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <StockChart selectedBank={selectedBank} />
+          <StockChart 
+            selectedBank={selectedBank} 
+            onSentimentUpdate={handleSentimentUpdate}
+          />
         </div>
+
+        <SentimentAnalysis 
+          selectedBank={selectedBank}
+          sentiment={sentiment}
+          priceChanges={priceChanges}
+        />
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricsCard label="P/E Ratio" value="12.45" />

@@ -10,9 +10,9 @@ interface StockDataPoint {
 
 interface StockChartProps {
   selectedBank: string;
+  onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void;
 }
 
-// Historical starting prices for each bank
 const bankInitialPrices = {
   'SBIN.NS': 580,
   'AXISBANK.NS': 1120,
@@ -52,7 +52,7 @@ const analyzeSentiment = (priceChanges: number[]) => {
   return { sentiment: 'Neutral', emoji: '➖', color: 'text-gray-500' };
 };
 
-const StockChart = ({ selectedBank }: StockChartProps) => {
+const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
@@ -76,10 +76,14 @@ const StockChart = ({ selectedBank }: StockChartProps) => {
                        now.getMinutes().toString().padStart(2, '0');
         
         const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
-        setPriceChanges(prev => [...prev.slice(-5), priceChange]);
+        const newPriceChanges = [...priceChanges.slice(-5), priceChange];
+        setPriceChanges(newPriceChanges);
         
         if (Math.abs(priceChange) > 0.5) {
-          const sentiment = analyzeSentiment([...priceChanges, priceChange]);
+          const sentiment = analyzeSentiment(newPriceChanges);
+          if (onSentimentUpdate) {
+            onSentimentUpdate(sentiment, newPriceChanges);
+          }
           toast({
             title: `${selectedBank} Market Update`,
             description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
@@ -93,7 +97,7 @@ const StockChart = ({ selectedBank }: StockChartProps) => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [selectedBank, toast, priceChanges]);
+  }, [selectedBank, toast, priceChanges, onSentimentUpdate]);
 
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
