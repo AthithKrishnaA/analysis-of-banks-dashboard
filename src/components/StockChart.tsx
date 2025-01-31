@@ -7,54 +7,76 @@ interface StockDataPoint {
   price: number;
 }
 
+interface StockChartProps {
+  selectedBank: string;
+}
+
+// Historical starting prices for each bank
+const bankInitialPrices = {
+  'SBIN.NS': 580,
+  'AXISBANK.NS': 1120,
+  'HDFCBANK.NS': 1450,
+  'KOTAKBANK.NS': 1780,
+  'ICICIBANK.NS': 980,
+};
+
+const generateInitialData = (basePrice: number) => {
+  const hours = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
+  return hours.map((hour, index) => {
+    // Add some variation to create realistic looking historical data
+    const variation = (Math.random() - 0.5) * 20;
+    return {
+      date: hour,
+      price: Math.round((basePrice + variation) * 100) / 100
+    };
+  });
+};
+
 const generateNewPrice = (lastPrice: number) => {
-  // Simulate market movements with random changes
   const changePercent = (Math.random() - 0.5) * 2; // -1% to +1% change
   const newPrice = lastPrice * (1 + changePercent / 100);
   return Math.round(newPrice * 100) / 100;
 };
 
-const StockChart = () => {
-  const [data, setData] = useState<StockDataPoint[]>([
-    { date: '10:00', price: 580 },
-    { date: '11:00', price: 590 },
-    { date: '12:00', price: 600 },
-    { date: '13:00', price: 585 },
-    { date: '14:00', price: 610 },
-    { date: '15:00', price: 621 },
-  ]);
+const StockChart = ({ selectedBank }: StockChartProps) => {
+  const [data, setData] = useState<StockDataPoint[]>([]);
   const { toast } = useToast();
 
+  // Reset data when bank changes
   useEffect(() => {
-    // Update price every 5 seconds
+    const basePrice = bankInitialPrices[selectedBank];
+    setData(generateInitialData(basePrice));
+    console.log(`Initialized price history for ${selectedBank}`);
+  }, [selectedBank]);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setData(prevData => {
+        if (!prevData.length) return prevData;
+        
         const lastPrice = prevData[prevData.length - 1].price;
         const newPrice = generateNewPrice(lastPrice);
         const now = new Date();
         const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
                        now.getMinutes().toString().padStart(2, '0');
         
-        // Show toast for significant price changes (>0.5%)
         const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
         if (Math.abs(priceChange) > 0.5) {
           toast({
-            title: "Price Update",
+            title: `${selectedBank} Price Update`,
             description: `${priceChange > 0 ? '📈' : '📉'} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'}`,
             duration: 3000,
           });
         }
 
-        // Keep last 6 data points
         const newData = [...prevData.slice(-5), { date: timeStr, price: newPrice }];
         return newData;
       });
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [toast]);
+  }, [selectedBank, toast]);
 
-  // Calculate price change percentage
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
     : 0;

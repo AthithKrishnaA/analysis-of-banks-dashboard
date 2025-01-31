@@ -98,7 +98,7 @@ const Index = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-4">
-          <StockChart />
+          <StockChart selectedBank={selectedBank} />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
