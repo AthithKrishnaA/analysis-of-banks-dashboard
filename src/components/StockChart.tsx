@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/components/ui/use-toast";
+import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
 
 interface StockDataPoint {
   date: string;
@@ -23,7 +24,6 @@ const bankInitialPrices = {
 const generateInitialData = (basePrice: number) => {
   const hours = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
   return hours.map((hour, index) => {
-    // Add some variation to create realistic looking historical data
     const variation = (Math.random() - 0.5) * 20;
     return {
       date: hour,
@@ -33,19 +33,34 @@ const generateInitialData = (basePrice: number) => {
 };
 
 const generateNewPrice = (lastPrice: number) => {
-  const changePercent = (Math.random() - 0.5) * 2; // -1% to +1% change
+  const changePercent = (Math.random() - 0.5) * 2;
   const newPrice = lastPrice * (1 + changePercent / 100);
   return Math.round(newPrice * 100) / 100;
 };
 
+const analyzeSentiment = (priceChanges: number[]) => {
+  const averageChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
+  const volatility = Math.sqrt(
+    priceChanges.reduce((sum, change) => sum + Math.pow(change - averageChange, 2), 0) / priceChanges.length
+  );
+
+  if (averageChange > 0.5 && volatility < 1) return { sentiment: 'Bullish', emoji: '🚀', color: 'text-green-600' };
+  if (averageChange > 0.2) return { sentiment: 'Slightly Bullish', emoji: '📈', color: 'text-green-500' };
+  if (averageChange < -0.5 && volatility < 1) return { sentiment: 'Bearish', emoji: '📉', color: 'text-red-600' };
+  if (averageChange < -0.2) return { sentiment: 'Slightly Bearish', emoji: '🔻', color: 'text-red-500' };
+  if (volatility > 1.5) return { sentiment: 'Volatile', emoji: '⚡', color: 'text-yellow-500' };
+  return { sentiment: 'Neutral', emoji: '➖', color: 'text-gray-500' };
+};
+
 const StockChart = ({ selectedBank }: StockChartProps) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
+  const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
 
-  // Reset data when bank changes
   useEffect(() => {
     const basePrice = bankInitialPrices[selectedBank];
     setData(generateInitialData(basePrice));
+    setPriceChanges([]);
     console.log(`Initialized price history for ${selectedBank}`);
   }, [selectedBank]);
 
@@ -61,10 +76,13 @@ const StockChart = ({ selectedBank }: StockChartProps) => {
                        now.getMinutes().toString().padStart(2, '0');
         
         const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
+        setPriceChanges(prev => [...prev.slice(-5), priceChange]);
+        
         if (Math.abs(priceChange) > 0.5) {
+          const sentiment = analyzeSentiment([...priceChanges, priceChange]);
           toast({
-            title: `${selectedBank} Price Update`,
-            description: `${priceChange > 0 ? '📈' : '📉'} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'}`,
+            title: `${selectedBank} Market Update`,
+            description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
             duration: 3000,
           });
         }
@@ -75,22 +93,32 @@ const StockChart = ({ selectedBank }: StockChartProps) => {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [selectedBank, toast]);
+  }, [selectedBank, toast, priceChanges]);
 
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
     : 0;
 
+  const sentiment = analyzeSentiment(priceChanges);
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm h-[400px]">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-bank-primary">Live Price History</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-semibold text-bank-primary">Live Price History</h2>
+          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${sentiment.color} bg-opacity-10`}>
+            <Gauge className="h-4 w-4" />
+            <span>{sentiment.emoji} {sentiment.sentiment}</span>
+          </div>
+        </div>
         <div className={`px-3 py-1 rounded-full text-sm font-medium ${
           priceChange > 0 ? 'bg-green-100 text-green-800' : 
           priceChange < 0 ? 'bg-red-100 text-red-800' : 
           'bg-gray-100 text-gray-800'
         }`}>
-          {priceChange > 0 ? '↑' : priceChange < 0 ? '↓' : '•'} {Math.abs(priceChange).toFixed(2)}%
+          {priceChange > 0 ? <TrendingUp className="h-4 w-4 inline mr-1" /> : 
+           priceChange < 0 ? <TrendingDown className="h-4 w-4 inline mr-1" /> : '•'} 
+          {Math.abs(priceChange).toFixed(2)}%
         </div>
       </div>
       <ResponsiveContainer width="100%" height="100%">
