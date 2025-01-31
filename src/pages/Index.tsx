@@ -5,6 +5,7 @@ import MetricsCard from '../components/MetricsCard';
 import BankSelector from '../components/BankSelector';
 import BankMetrics from '../components/BankMetrics';
 import SentimentAnalysis from '../components/SentimentAnalysis';
+import BankComparison from '../components/BankComparison';
 
 const mockBankData = {
   'SBIN.NS': {
@@ -128,6 +129,8 @@ const Index = () => {
           <MetricsCard label="52 Week High" value="₹629.35" />
           <MetricsCard label="52 Week Low" value="₹501.85" />
         </div>
+
+        <BankComparison selectedBank={selectedBank} />
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
           <BankMetrics bankData={mockBankData[selectedBank]} />
