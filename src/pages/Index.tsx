@@ -102,6 +102,9 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-4 rounded-lg backdrop-blur-sm">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent mb-4">
+            INDIAN BANKS ANALYSIS DASHBOARD
+          </h1>
           <BankSelector onBankChange={handleBankChange} selectedBank={selectedBank} />
           <Link
             to="/predictive-analysis"
