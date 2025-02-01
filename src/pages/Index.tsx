@@ -7,6 +7,7 @@ import BankMetrics from '../components/BankMetrics';
 import SentimentAnalysis from '../components/SentimentAnalysis';
 import BankComparison from '../components/BankComparison';
 import BankRiskMetrics from '../components/BankRiskMetrics';
+import CommonAnalysis from '../components/CommonAnalysis';
 
 const mockBankData = {
   'SBIN.NS': {
@@ -137,6 +138,11 @@ const Index = () => {
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
           <BankMetrics bankData={mockBankData[selectedBank]} />
+        </div>
+
+        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
+          <h2 className="text-2xl font-bold text-bank-primary mb-6">Common Analysis</h2>
+          <CommonAnalysis />
         </div>
       </div>
     </div>
