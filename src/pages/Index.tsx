@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import StockChart from '../components/StockChart';
 import MetricsCard from '../components/MetricsCard';
@@ -102,6 +103,12 @@ const Index = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-4 rounded-lg backdrop-blur-sm">
           <BankSelector onBankChange={handleBankChange} selectedBank={selectedBank} />
+          <Link
+            to="/predictive-analysis"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            View Predictive Analysis
+          </Link>
         </div>
         
         <Header selectedBank={selectedBank} />
