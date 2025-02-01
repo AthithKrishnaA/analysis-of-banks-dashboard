@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis, BoxPlot, BoxPlotChart } from 'recharts';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
 
 const bankColors = {
   'HDFC Bank': '#1E40AF',
@@ -24,13 +24,19 @@ const stockPriceData = Array.from({ length: 180 }, (_, i) => {
   };
 });
 
-const dailyReturnsData = [
-  { bank: 'HDFC Bank', min: -0.05, q1: -0.02, median: 0.001, q3: 0.02, max: 0.05 },
-  { bank: 'State Bank of India', min: -0.06, q1: -0.025, median: 0, q3: 0.025, max: 0.06 },
-  { bank: 'ICICI Bank', min: -0.055, q1: -0.022, median: 0.002, q3: 0.022, max: 0.055 },
-  { bank: 'Axis Bank', min: -0.065, q1: -0.028, median: -0.001, q3: 0.028, max: 0.065 },
-  { bank: 'Kotak Bank', min: -0.045, q1: -0.018, median: 0.003, q3: 0.018, max: 0.045 },
-];
+// Transform daily returns data into scatter plot format
+const generateReturnsScatterData = () => {
+  const banks = Object.keys(bankColors);
+  return banks.flatMap(bank => 
+    Array.from({ length: 100 }, () => ({
+      bank,
+      return: (Math.random() * 0.1 - 0.05), // Random returns between -5% and 5%
+      frequency: Math.random() * 100
+    }))
+  );
+};
+
+const returnsScatterData = generateReturnsScatterData();
 
 const volumeData = Array.from({ length: 30 }, (_, i) => ({
   date: new Date(2024, 0, 1 + i).toISOString().split('T')[0],
@@ -100,21 +106,36 @@ const CommonAnalysis = () => {
           </CardHeader>
           <CardContent className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BoxPlotChart data={dailyReturnsData}>
+              <ScatterChart>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="bank" />
-                <YAxis />
-                <Tooltip />
-                <BoxPlot
-                  dataKey="returns"
-                  fill="#8884d8"
-                  whiskers={[
-                    { key: "min", fill: "#8884d8" },
-                    { key: "max", fill: "#8884d8" }
-                  ]}
-                  median={{ stroke: "#8884d8" }}
+                <XAxis 
+                  type="category" 
+                  dataKey="bank" 
+                  name="Bank"
                 />
-              </BoxPlotChart>
+                <YAxis 
+                  dataKey="return"
+                  name="Return"
+                  tickFormatter={(value) => `${(value * 100).toFixed(1)}%`}
+                />
+                <ZAxis 
+                  dataKey="frequency" 
+                  range={[20, 200]} 
+                  name="Frequency"
+                />
+                <Tooltip 
+                  formatter={(value: any, name: string) => {
+                    if (name === 'Return') {
+                      return [`${(Number(value) * 100).toFixed(2)}%`, name];
+                    }
+                    return [value, name];
+                  }}
+                />
+                <Scatter 
+                  data={returnsScatterData} 
+                  fill="#8884d8"
+                />
+              </ScatterChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
