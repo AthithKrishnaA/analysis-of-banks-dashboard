@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import BankSelector from '../components/BankSelector';
 
 const bankColors = {
   'HDFC Bank': '#1E40AF',
@@ -58,18 +59,20 @@ const generateVolumePredictions = () => {
 
 const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const { toast } = useToast();
   const pricePredictions = generatePredictions();
   const volumePredictions = generateVolumePredictions();
 
-  const handleRefreshPredictions = () => {
+  const handleBankChange = (bankId: string) => {
+    setSelectedBank(bankId);
     setIsLoading(true);
-    // Simulate ML model processing time
+    // Simulate ML model processing time for new bank
     setTimeout(() => {
       setIsLoading(false);
       toast({
         title: "Predictions Updated",
-        description: "ML models have generated new market predictions",
+        description: `ML models have generated new market predictions for ${bankId}`,
       });
     }, 2000);
   };
@@ -77,10 +80,10 @@ const PredictiveAnalysis = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Predictive Market Analysis</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 p-4 rounded-lg backdrop-blur-sm">
+          <BankSelector onBankChange={handleBankChange} selectedBank={selectedBank} />
           <button
-            onClick={handleRefreshPredictions}
+            onClick={() => handleBankChange(selectedBank)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             disabled={isLoading}
           >
