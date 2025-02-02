@@ -6,6 +6,7 @@ import BankPricePredictions from '../components/predictive/BankPricePredictions'
 import VolumeChart from '../components/predictive/VolumeChart';
 import ConfidenceIntervals from '../components/predictive/ConfidenceIntervals';
 import RiskAssessment from '../components/predictive/RiskAssessment';
+import { bankSymbolToName } from '../components/predictive/constants';
 
 // Generate mock future predictions
 const generatePredictions = () => {
