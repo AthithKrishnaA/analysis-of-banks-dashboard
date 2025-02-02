@@ -2,12 +2,27 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ScatterChart, Scatter, ZAxis } from 'recharts';
 
+interface CommonAnalysisProps {
+  selectedBank: string;
+}
+
 const bankColors = {
   'HDFC Bank': '#1E40AF',
   'State Bank of India': '#047857',
   'ICICI Bank': '#BE123C',
   'Axis Bank': '#6D28D9',
   'Kotak Bank': '#EA580C'
+};
+
+const getBankNameFromSymbol = (symbol: string) => {
+  const mapping: { [key: string]: string } = {
+    'SBIN.NS': 'State Bank of India',
+    'HDFCBANK.NS': 'HDFC Bank',
+    'ICICIBANK.NS': 'ICICI Bank',
+    'AXISBANK.NS': 'Axis Bank',
+    'KOTAKBANK.NS': 'Kotak Bank'
+  };
+  return mapping[symbol] || symbol;
 };
 
 // Sample data - in a real app, this would come from an API
@@ -60,7 +75,10 @@ const correlationData = [
   { bank1: 'Axis Bank', bank2: 'Kotak Bank', correlation: 0.69 },
 ];
 
-const CommonAnalysis = () => {
+const CommonAnalysis = ({ selectedBank }: CommonAnalysisProps) => {
+  const selectedBankName = getBankNameFromSymbol(selectedBank);
+  console.log('Common Analysis - Selected Bank:', selectedBankName);
+
   return (
     <div className="space-y-6">
       <Card>
@@ -92,6 +110,8 @@ const CommonAnalysis = () => {
                   stroke={color}
                   dot={false}
                   name={bank}
+                  opacity={bank === selectedBankName ? 1 : 0.3}
+                  strokeWidth={bank === selectedBankName ? 2 : 1}
                 />
               ))}
             </LineChart>

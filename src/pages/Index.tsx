@@ -153,12 +153,12 @@ const Index = () => {
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
           <h2 className="text-2xl font-bold text-bank-primary mb-6">Common Analysis</h2>
-          <CommonAnalysis />
+          <CommonAnalysis selectedBank={selectedBank} />
         </div>
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
           <h2 className="text-2xl font-bold text-bank-primary mb-6">Marketing Analytics</h2>
-          <MarketingAnalytics />
+          <MarketingAnalytics selectedBank={selectedBank} />
         </div>
       </div>
     </div>
