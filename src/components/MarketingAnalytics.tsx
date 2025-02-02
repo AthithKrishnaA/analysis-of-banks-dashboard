@@ -69,39 +69,11 @@ const generateConversionData = () => {
   });
 };
 
-// Generate fresh data
-const campaignData = generateCampaignData();
-const conversionData = generateConversionData();
-
-const acquisitionCosts = {
-  'HDFC Bank': {
-    current: '₹2,500',
-    trend: '-12%',
-    color: 'text-green-600'
-  },
-  'State Bank of India': {
-    current: '₹2,800',
-    trend: '-8%',
-    color: 'text-green-600'
-  },
-  'ICICI Bank': {
-    current: '₹2,600',
-    trend: '-10%',
-    color: 'text-green-600'
-  },
-  'Axis Bank': {
-    current: '₹2,900',
-    trend: '+2%',
-    color: 'text-red-600'
-  },
-  'Kotak Bank': {
-    current: '₹2,700',
-    trend: '-5%',
-    color: 'text-green-600'
-  }
-};
-
 const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
+  // Generate fresh data on each render
+  const campaignData = generateCampaignData();
+  const conversionData = generateConversionData();
+  
   const selectedBankName = getBankNameFromSymbol(selectedBank);
   console.log('Marketing Analytics - Selected Bank:', selectedBankName);
 
@@ -134,32 +106,32 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
         </CardContent>
       </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Marketing Channel Distribution</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={channelData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={150}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {channelData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Marketing Channel Distribution</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={channelData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={150}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {channelData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
