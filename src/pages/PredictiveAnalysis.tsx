@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import BankSelector from '../components/BankSelector';
@@ -11,6 +11,14 @@ const bankColors = {
   'ICICI Bank': '#BE123C',
   'Axis Bank': '#6D28D9',
   'Kotak Bank': '#EA580C'
+};
+
+const bankSymbolToName: { [key: string]: string } = {
+  'HDFCBANK.NS': 'HDFC Bank',
+  'SBIN.NS': 'State Bank of India',
+  'ICICIBANK.NS': 'ICICI Bank',
+  'AXISBANK.NS': 'Axis Bank',
+  'KOTAKBANK.NS': 'Kotak Bank'
 };
 
 // Generate mock future predictions
@@ -57,12 +65,36 @@ const generateVolumePredictions = () => {
   return predictions;
 };
 
+// Generate confidence intervals for a specific bank
+const generateConfidenceIntervals = (bankSymbol: string) => {
+  const bankName = bankSymbolToName[bankSymbol];
+  const predictions = [];
+  const startDate = new Date();
+  const baseValue = Math.random() * 1000 + 1000; // Random base value between 1000-2000
+  
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + i);
+    
+    const uncertainty = i * 2; // Increasing uncertainty over time
+    predictions.push({
+      date: date.toISOString().split('T')[0],
+      [bankName]: baseValue + Math.sin(i / 5) * 100 + i * 5,
+      'Upper Bound': baseValue + Math.sin(i / 5) * 100 + i * 5 + uncertainty,
+      'Lower Bound': baseValue + Math.sin(i / 5) * 100 + i * 5 - uncertainty,
+    });
+  }
+  
+  return predictions;
+};
+
 const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const { toast } = useToast();
   const pricePredictions = generatePredictions();
   const volumePredictions = generateVolumePredictions();
+  const confidenceIntervals = generateConfidenceIntervals(selectedBank);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -75,6 +107,22 @@ const PredictiveAnalysis = () => {
         description: `ML models have generated new market predictions for ${bankId}`,
       });
     }, 2000);
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 border rounded shadow-lg">
+          <p className="text-sm font-semibold">{new Date(label).toLocaleDateString()}</p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: entry.color }} className="text-sm">
+              {entry.name}: ₹{entry.value.toFixed(2)}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
   };
 
   return (
@@ -110,14 +158,8 @@ const PredictiveAnalysis = () => {
                   })}
                 />
                 <YAxis />
-                <Tooltip
-                  formatter={(value: number) => [`₹${value.toFixed(2)}`, '']}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
                 {Object.entries(bankColors).map(([bank, color]) => (
                   <Line
                     key={bank}
@@ -149,14 +191,8 @@ const PredictiveAnalysis = () => {
                   })}
                 />
                 <YAxis />
-                <Tooltip
-                  formatter={(value: number) => [new Intl.NumberFormat().format(value), '']}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend />
                 {Object.entries(bankColors).map(([bank, color]) => (
                   <Area
                     key={bank}
@@ -180,7 +216,7 @@ const PredictiveAnalysis = () => {
             </CardHeader>
             <CardContent className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={pricePredictions.slice(0, 30)}>
+                <AreaChart data={confidenceIntervals}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="date"
@@ -190,12 +226,27 @@ const PredictiveAnalysis = () => {
                     })}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
                   <Area
                     type="monotone"
-                    dataKey="HDFC Bank"
-                    stroke="#1E40AF"
-                    fill="#1E40AF"
+                    dataKey={bankSymbolToName[selectedBank]}
+                    stroke={bankColors[bankSymbolToName[selectedBank]]}
+                    fill={bankColors[bankSymbolToName[selectedBank]]}
+                    fillOpacity={0.3}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Upper Bound"
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
+                    fillOpacity={0.1}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Lower Bound"
+                    stroke="#94A3B8"
+                    fill="#94A3B8"
                     fillOpacity={0.1}
                   />
                 </AreaChart>
@@ -219,7 +270,8 @@ const PredictiveAnalysis = () => {
                     })}
                   />
                   <YAxis />
-                  <Tooltip />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend />
                   {Object.entries(bankColors).map(([bank, color]) => (
                     <Line
                       key={bank}
