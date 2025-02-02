@@ -25,18 +25,22 @@ const getBankNameFromSymbol = (symbol: string) => {
   return mapping[symbol] || symbol;
 };
 
-// Sample data - in a real app, this would come from an API
-const campaignData = Array.from({ length: 12 }, (_, i) => {
-  const date = new Date(2024, i, 1);
-  return {
-    month: date.toLocaleString('default', { month: 'short' }),
-    'HDFC Bank': Math.random() * 100 + 50,
-    'State Bank of India': Math.random() * 100 + 40,
-    'ICICI Bank': Math.random() * 100 + 45,
-    'Axis Bank': Math.random() * 100 + 35,
-    'Kotak Bank': Math.random() * 100 + 30,
-  };
-});
+// Generate campaign data for the last 12 months up to current date
+const generateCampaignData = () => {
+  const currentDate = new Date();
+  return Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(currentDate);
+    date.setMonth(currentDate.getMonth() - (11 - i));
+    return {
+      month: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
+      'HDFC Bank': Math.random() * 100 + 50,
+      'State Bank of India': Math.random() * 100 + 40,
+      'ICICI Bank': Math.random() * 100 + 45,
+      'Axis Bank': Math.random() * 100 + 35,
+      'Kotak Bank': Math.random() * 100 + 30,
+    };
+  });
+};
 
 const channelData = [
   { channel: 'Social Media', value: 35 },
@@ -48,14 +52,26 @@ const channelData = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-const conversionData = Array.from({ length: 6 }, (_, i) => ({
-  month: new Date(2024, i, 1).toLocaleString('default', { month: 'short' }),
-  'HDFC Bank': (Math.random() * 2 + 2).toFixed(2),
-  'State Bank of India': (Math.random() * 2 + 1.8).toFixed(2),
-  'ICICI Bank': (Math.random() * 2 + 1.9).toFixed(2),
-  'Axis Bank': (Math.random() * 2 + 1.7).toFixed(2),
-  'Kotak Bank': (Math.random() * 2 + 1.6).toFixed(2),
-}));
+// Generate conversion data for the last 6 months up to current date
+const generateConversionData = () => {
+  const currentDate = new Date();
+  return Array.from({ length: 6 }, (_, i) => {
+    const date = new Date(currentDate);
+    date.setMonth(currentDate.getMonth() - (5 - i));
+    return {
+      month: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
+      'HDFC Bank': (Math.random() * 2 + 2).toFixed(2),
+      'State Bank of India': (Math.random() * 2 + 1.8).toFixed(2),
+      'ICICI Bank': (Math.random() * 2 + 1.9).toFixed(2),
+      'Axis Bank': (Math.random() * 2 + 1.7).toFixed(2),
+      'Kotak Bank': (Math.random() * 2 + 1.6).toFixed(2),
+    };
+  });
+};
+
+// Generate fresh data
+const campaignData = generateCampaignData();
+const conversionData = generateConversionData();
 
 const acquisitionCosts = {
   'HDFC Bank': {
@@ -118,7 +134,6 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Marketing Channel Distribution</CardTitle>
@@ -146,30 +161,29 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Conversion Rates</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={conversionData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                {Object.entries(bankColors).map(([bank, color]) => (
-                  <Bar
-                    key={bank}
-                    dataKey={bank}
-                    fill={color}
-                    name={bank}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Conversion Rates</CardTitle>
+        </CardHeader>
+        <CardContent className="h-[400px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={conversionData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              {Object.entries(bankColors).map(([bank, color]) => (
+                <Bar
+                  key={bank}
+                  dataKey={bank}
+                  fill={color}
+                  name={bank}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
