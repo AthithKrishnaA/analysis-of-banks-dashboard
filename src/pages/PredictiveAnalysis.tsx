@@ -1,25 +1,11 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Loader2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import BankSelector from '../components/BankSelector';
-
-const bankColors = {
-  'HDFC Bank': '#1E40AF',
-  'State Bank of India': '#047857',
-  'ICICI Bank': '#BE123C',
-  'Axis Bank': '#6D28D9',
-  'Kotak Bank': '#EA580C'
-};
-
-const bankSymbolToName: { [key: string]: string } = {
-  'HDFCBANK.NS': 'HDFC Bank',
-  'SBIN.NS': 'State Bank of India',
-  'ICICIBANK.NS': 'ICICI Bank',
-  'AXISBANK.NS': 'Axis Bank',
-  'KOTAKBANK.NS': 'Kotak Bank'
-};
+import BankPricePredictions from '../components/predictive/BankPricePredictions';
+import VolumeChart from '../components/predictive/VolumeChart';
+import ConfidenceIntervals from '../components/predictive/ConfidenceIntervals';
+import RiskAssessment from '../components/predictive/RiskAssessment';
 
 // Generate mock future predictions
 const generatePredictions = () => {
@@ -70,13 +56,13 @@ const generateConfidenceIntervals = (bankSymbol: string) => {
   const bankName = bankSymbolToName[bankSymbol];
   const predictions = [];
   const startDate = new Date();
-  const baseValue = Math.random() * 1000 + 1000; // Random base value between 1000-2000
+  const baseValue = Math.random() * 1000 + 1000;
   
   for (let i = 0; i < 30; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
     
-    const uncertainty = i * 2; // Increasing uncertainty over time
+    const uncertainty = i * 2;
     predictions.push({
       date: date.toISOString().split('T')[0],
       [bankName]: baseValue + Math.sin(i / 5) * 100 + i * 5,
@@ -92,6 +78,7 @@ const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const { toast } = useToast();
+  
   const pricePredictions = generatePredictions();
   const volumePredictions = generateVolumePredictions();
   const confidenceIntervals = generateConfidenceIntervals(selectedBank);
@@ -99,7 +86,6 @@ const PredictiveAnalysis = () => {
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
     setIsLoading(true);
-    // Simulate ML model processing time for new bank
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -107,22 +93,6 @@ const PredictiveAnalysis = () => {
         description: `ML models have generated new market predictions for ${bankId}`,
       });
     }, 2000);
-  };
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-white p-4 border rounded shadow-lg">
-          <p className="text-sm font-semibold">{new Date(label).toLocaleDateString()}</p>
-          {payload.map((entry: any, index: number) => (
-            <p key={index} style={{ color: entry.color }} className="text-sm">
-              {entry.name}: ₹{entry.value.toFixed(2)}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
@@ -135,157 +105,20 @@ const PredictiveAnalysis = () => {
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : null}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
             Refresh Predictions
           </button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>90-Day Price Predictions</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={pricePredictions}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { 
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                {Object.entries(bankColors).map(([bank, color]) => (
-                  <Line
-                    key={bank}
-                    type="monotone"
-                    dataKey={bank}
-                    stroke={color}
-                    dot={false}
-                    name={bank}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Predicted Trading Volume Trends</CardTitle>
-          </CardHeader>
-          <CardContent className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={volumePredictions}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                />
-                <YAxis />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend />
-                {Object.entries(bankColors).map(([bank, color]) => (
-                  <Area
-                    key={bank}
-                    type="monotone"
-                    dataKey={bank}
-                    stackId="1"
-                    stroke={color}
-                    fill={color}
-                    name={bank}
-                  />
-                ))}
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <BankPricePredictions pricePredictions={pricePredictions} />
+        <VolumeChart volumePredictions={volumePredictions} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Confidence Intervals</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={confidenceIntervals}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  <Area
-                    type="monotone"
-                    dataKey={bankSymbolToName[selectedBank]}
-                    stroke={bankColors[bankSymbolToName[selectedBank]]}
-                    fill={bankColors[bankSymbolToName[selectedBank]]}
-                    fillOpacity={0.3}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Upper Bound"
-                    stroke="#94A3B8"
-                    fill="#94A3B8"
-                    fillOpacity={0.1}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="Lower Bound"
-                    stroke="#94A3B8"
-                    fill="#94A3B8"
-                    fillOpacity={0.1}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Risk Assessment</CardTitle>
-            </CardHeader>
-            <CardContent className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={pricePredictions.slice(0, 30)}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
-                    })}
-                  />
-                  <YAxis />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend />
-                  {Object.entries(bankColors).map(([bank, color]) => (
-                    <Line
-                      key={bank}
-                      type="monotone"
-                      dataKey={bank}
-                      stroke={color}
-                      dot={false}
-                      name={bank}
-                    />
-                  ))}
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <ConfidenceIntervals 
+            confidenceIntervals={confidenceIntervals}
+            selectedBank={selectedBank}
+          />
+          <RiskAssessment pricePredictions={pricePredictions} />
         </div>
       </div>
     </div>
