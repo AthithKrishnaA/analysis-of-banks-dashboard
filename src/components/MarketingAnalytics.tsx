@@ -69,10 +69,42 @@ const generateConversionData = () => {
   });
 };
 
+// Generate acquisition costs data
+const generateAcquisitionCosts = () => {
+  return {
+    'HDFC Bank': {
+      current: '₹2,450',
+      trend: '+5.2%',
+      color: 'text-green-600'
+    },
+    'State Bank of India': {
+      current: '₹2,180',
+      trend: '-2.1%',
+      color: 'text-red-600'
+    },
+    'ICICI Bank': {
+      current: '₹2,320',
+      trend: '+3.4%',
+      color: 'text-green-600'
+    },
+    'Axis Bank': {
+      current: '₹2,150',
+      trend: '+1.8%',
+      color: 'text-green-600'
+    },
+    'Kotak Bank': {
+      current: '₹2,280',
+      trend: '-1.5%',
+      color: 'text-red-600'
+    }
+  };
+};
+
 const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
   // Generate fresh data on each render
   const campaignData = generateCampaignData();
   const conversionData = generateConversionData();
+  const acquisitionCosts = generateAcquisitionCosts();
   
   const selectedBankName = getBankNameFromSymbol(selectedBank);
   console.log('Marketing Analytics - Selected Bank:', selectedBankName);
