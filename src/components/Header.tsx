@@ -7,7 +7,7 @@ interface HeaderProps {
 }
 
 const bankInfo = {
-  'SBIN.NSE': {
+  'SBIN.NS': {
     name: 'State Bank of India',
     price: '621.90',
     change: '+8.45',
@@ -15,7 +15,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '22,000+'
   },
-  'AXISBANK.NSE': {
+  'AXISBANK.NS': {
     name: 'Axis Bank',
     price: '1,123.45',
     change: '+15.30',
@@ -23,7 +23,7 @@ const bankInfo = {
     creditRating: 'AA+',
     branches: '15,000+'
   },
-  'HDFCBANK.NSE': {
+  'HDFCBANK.NS': {
     name: 'HDFC Bank',
     price: '1,456.75',
     change: '+21.50',
@@ -31,7 +31,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '18,000+'
   },
-  'KOTAKBANK.NSE': {
+  'KOTAKBANK.NS': {
     name: 'Kotak Bank',
     price: '1,789.60',
     change: '-12.40',
@@ -39,7 +39,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '12,000+'
   },
-  'ICICIBANK.NSE': {
+  'ICICIBANK.NS': {
     name: 'ICICI Bank',
     price: '987.30',
     change: '+18.75',
@@ -50,7 +50,15 @@ const bankInfo = {
 };
 
 const Header = ({ selectedBank }: HeaderProps) => {
+  console.log('Header - Selected Bank:', selectedBank);
+  console.log('Header - Bank Info:', bankInfo[selectedBank]);
+  
   const bank = bankInfo[selectedBank];
+  if (!bank) {
+    console.error('Bank info not found for symbol:', selectedBank);
+    return null;
+  }
+
   const isPositiveChange = !bank.change.startsWith('-');
 
   return (
