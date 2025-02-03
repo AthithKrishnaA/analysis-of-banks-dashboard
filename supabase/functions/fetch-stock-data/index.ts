@@ -24,37 +24,45 @@ Deno.serve(async (req) => {
     const { symbol } = await req.json()
     const apiKey = Deno.env.get('ALPHA_VANTAGE_API_KEY')
     
+    console.log('Processing request for symbol:', symbol)
+    
     if (!apiKey) {
+      console.error('API key not configured')
       throw new Error('API key not configured')
     }
 
+    if (!symbol) {
+      console.error('No symbol provided')
+      throw new Error('Symbol is required')
+    }
+
     // Fetch from Alpha Vantage
-    const response = await fetch(
-      `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`
-    )
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`
+    console.log('Fetching data from:', url)
+    
+    const response = await fetch(url)
     const data = await response.json()
+    
+    console.log('Alpha Vantage response:', JSON.stringify(data))
     
     if (data['Error Message']) {
       throw new Error(data['Error Message'])
     }
 
-    const timeSeries = data['Time Series (5min)']
-    if (!timeSeries) {
-      throw new Error('No data available')
+    if (!data['Global Quote']) {
+      throw new Error('No data available for this symbol')
     }
 
-    // Process the latest data point
-    const latestTimestamp = Object.keys(timeSeries)[0]
-    const latestData = timeSeries[latestTimestamp]
+    const quote = data['Global Quote']
     
     const stockData: StockData = {
       symbol,
-      date: latestTimestamp,
-      open: parseFloat(latestData['1. open']),
-      high: parseFloat(latestData['2. high']),
-      low: parseFloat(latestData['3. low']),
-      close: parseFloat(latestData['4. close']),
-      volume: parseInt(latestData['5. volume'])
+      date: new Date().toISOString(),
+      open: parseFloat(quote['02. open']),
+      high: parseFloat(quote['03. high']),
+      low: parseFloat(quote['04. low']),
+      close: parseFloat(quote['05. price']),
+      volume: parseInt(quote['06. volume'])
     }
 
     // Store in Supabase
@@ -76,6 +84,7 @@ Deno.serve(async (req) => {
       })
 
     if (upsertError) {
+      console.error('Error upserting data:', upsertError)
       throw upsertError
     }
 
@@ -83,6 +92,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
+    console.error('Function error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
