@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     let requestBody;
     try {
-      requestBody = text ? JSON.parse(text) : {};
+      requestBody = JSON.parse(text);
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
       return new Response(
@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { symbol } = requestBody;
+    const { symbol } = requestBody || {};
     console.log('Processing request for symbol:', symbol);
 
     if (!symbol) {
