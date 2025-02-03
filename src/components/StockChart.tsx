@@ -38,10 +38,16 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
       console.log('Fetching data for symbol:', selectedBank);
 
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank }
+        body: { symbol: selectedBank },
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching stock data:', error);
+        throw error;
+      }
 
       if (stockData) {
         const newPrice = stockData.close;

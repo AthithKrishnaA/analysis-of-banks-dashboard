@@ -18,14 +18,16 @@ interface StockData {
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      headers: { ...corsHeaders }
+    })
   }
 
   try {
     const { symbol } = await req.json()
     const apiKey = Deno.env.get('ALPHA_VANTAGE_API_KEY')
     
-    console.log('Processing request for original symbol:', symbol)
+    console.log('Processing request for symbol:', symbol)
     
     if (!apiKey) {
       console.error('API key not configured')
@@ -41,11 +43,15 @@ Deno.serve(async (req) => {
     const alphaVantageSymbol = symbol.replace('.NSE', '.BSE')
     console.log('Converted symbol for Alpha Vantage:', alphaVantageSymbol)
 
-    // Fetch from Alpha Vantage
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${alphaVantageSymbol}&apikey=${apiKey}`
     console.log('Fetching data from:', url)
     
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Supabase Edge Function'
+      }
+    })
+    
     if (!response.ok) {
       throw new Error(`Alpha Vantage API error: ${response.status} ${response.statusText}`)
     }
@@ -62,7 +68,7 @@ Deno.serve(async (req) => {
     }
 
     const quote = data['Global Quote']
-    const currentDate = new Date().toISOString().split('T')[0] // Get current date in YYYY-MM-DD format
+    const currentDate = new Date().toISOString().split('T')[0]
     
     const stockData: StockData = {
       symbol,
@@ -76,7 +82,7 @@ Deno.serve(async (req) => {
 
     console.log('Processed stock data:', stockData)
 
-    // Store in Supabase using upsert operation
+    // Store in Supabase
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
