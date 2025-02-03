@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
     const { symbol } = await req.json()
     const apiKey = Deno.env.get('ALPHA_VANTAGE_API_KEY')
     
-    console.log('Processing request for symbol:', symbol)
+    console.log('Processing request for original symbol:', symbol)
     
     if (!apiKey) {
       console.error('API key not configured')
@@ -36,8 +36,12 @@ Deno.serve(async (req) => {
       throw new Error('Symbol is required')
     }
 
+    // Convert NSE symbol to BSE format for Alpha Vantage
+    const alphaVantageSymbol = symbol.replace('.NSE', '.BSE')
+    console.log('Converted symbol for Alpha Vantage:', alphaVantageSymbol)
+
     // Fetch from Alpha Vantage
-    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${alphaVantageSymbol}&apikey=${apiKey}`
     console.log('Fetching data from:', url)
     
     const response = await fetch(url)
@@ -49,7 +53,7 @@ Deno.serve(async (req) => {
       throw new Error(data['Error Message'])
     }
 
-    if (!data['Global Quote']) {
+    if (!data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) {
       throw new Error('No data available for this symbol')
     }
 
