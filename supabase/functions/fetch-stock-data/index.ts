@@ -24,27 +24,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const text = await req.text();
-    console.log('Raw request body:', text);
-
-    let requestBody;
-    try {
-      requestBody = JSON.parse(text);
-    } catch (parseError) {
-      console.error('Error parsing request body:', parseError);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid JSON in request body',
-          details: parseError.message 
-        }), 
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    const { symbol } = requestBody || {};
+    const { symbol } = await req.json();
     console.log('Processing request for symbol:', symbol);
 
     if (!symbol) {
@@ -52,8 +32,7 @@ Deno.serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           error: 'Symbol is required',
-          details: 'No symbol provided in request body',
-          receivedBody: requestBody
+          details: 'No symbol provided in request body'
         }), 
         { 
           status: 400,
@@ -136,38 +115,6 @@ Deno.serve(async (req) => {
       close: parseFloat(quote['05. price']),
       volume: parseInt(quote['06. volume'])
     };
-
-    // Store data in Supabase
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    const { error: upsertError } = await supabaseClient
-      .from('stock_prices')
-      .upsert({
-        symbol: stockData.symbol,
-        date: stockData.date.split('T')[0],
-        open_price: stockData.open,
-        high_price: stockData.high,
-        low_price: stockData.low,
-        close_price: stockData.close,
-        volume: stockData.volume
-      });
-
-    if (upsertError) {
-      console.error('Error storing data:', upsertError);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Database error',
-          details: upsertError.message
-        }), 
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
 
     return new Response(
       JSON.stringify(stockData), 
