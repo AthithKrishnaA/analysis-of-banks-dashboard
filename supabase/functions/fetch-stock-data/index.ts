@@ -24,7 +24,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { symbol } = await req.json()
+    const requestData = await req.json()
+    const { symbol } = requestData
     const apiKey = Deno.env.get('ALPHA_VANTAGE_API_KEY')
     
     console.log('Processing request for symbol:', symbol)
@@ -33,7 +34,10 @@ Deno.serve(async (req) => {
       console.error('API key not configured')
       return new Response(
         JSON.stringify({ error: 'API key not configured' }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
@@ -41,7 +45,10 @@ Deno.serve(async (req) => {
       console.error('No symbol provided')
       return new Response(
         JSON.stringify({ error: 'Symbol is required' }), 
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
@@ -50,7 +57,7 @@ Deno.serve(async (req) => {
     console.log('Converted symbol for Alpha Vantage:', alphaVantageSymbol)
 
     const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${alphaVantageSymbol}&apikey=${apiKey}`
-    console.log('Fetching data from:', url)
+    console.log('Fetching data from Alpha Vantage')
     
     const response = await fetch(url, {
       headers: {
@@ -61,8 +68,13 @@ Deno.serve(async (req) => {
     if (!response.ok) {
       console.error('Alpha Vantage API error:', response.status, response.statusText)
       return new Response(
-        JSON.stringify({ error: `Alpha Vantage API error: ${response.status} ${response.statusText}` }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: `Alpha Vantage API error: ${response.status} ${response.statusText}` 
+        }), 
+        { 
+          status: response.status, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
     
@@ -73,7 +85,10 @@ Deno.serve(async (req) => {
       console.error('Alpha Vantage error:', data['Error Message'])
       return new Response(
         JSON.stringify({ error: data['Error Message'] }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
@@ -81,16 +96,19 @@ Deno.serve(async (req) => {
       console.error('No data available for symbol:', symbol)
       return new Response(
         JSON.stringify({ error: 'No data available for this symbol' }), 
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 404, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
     const quote = data['Global Quote']
-    const currentDate = new Date().toISOString().split('T')[0]
+    const currentDate = new Date().toISOString()
     
     const stockData: StockData = {
       symbol,
-      date: currentDate,
+      date: currentDate.split('T')[0],
       open: parseFloat(quote['02. open']),
       high: parseFloat(quote['03. high']),
       low: parseFloat(quote['04. low']),
@@ -123,22 +141,39 @@ Deno.serve(async (req) => {
     if (upsertError) {
       console.error('Error upserting data:', upsertError)
       return new Response(
-        JSON.stringify({ error: 'Failed to store stock data' }), 
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: 'Failed to store stock data', 
+          details: upsertError.message 
+        }), 
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       )
     }
 
     console.log('Successfully stored data in Supabase')
 
     return new Response(
-      JSON.stringify(stockData),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: true, 
+        data: stockData 
+      }),
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   } catch (error) {
     console.error('Function error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }), 
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        details: error.message 
+      }), 
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     )
   }
 })
