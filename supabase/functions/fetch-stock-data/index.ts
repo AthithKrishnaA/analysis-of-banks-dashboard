@@ -16,6 +16,7 @@ interface StockData {
 }
 
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -45,8 +46,11 @@ Deno.serve(async (req) => {
     console.log('Fetching data from:', url)
     
     const response = await fetch(url)
-    const data = await response.json()
+    if (!response.ok) {
+      throw new Error(`Alpha Vantage API error: ${response.status} ${response.statusText}`)
+    }
     
+    const data = await response.json()
     console.log('Alpha Vantage response:', JSON.stringify(data))
     
     if (data['Error Message']) {
@@ -58,16 +62,19 @@ Deno.serve(async (req) => {
     }
 
     const quote = data['Global Quote']
+    const currentDate = new Date().toISOString().split('T')[0] // Get current date in YYYY-MM-DD format
     
     const stockData: StockData = {
       symbol,
-      date: new Date().toISOString(),
+      date: currentDate,
       open: parseFloat(quote['02. open']),
       high: parseFloat(quote['03. high']),
       low: parseFloat(quote['04. low']),
       close: parseFloat(quote['05. price']),
       volume: parseInt(quote['06. volume'])
     }
+
+    console.log('Processed stock data:', stockData)
 
     // Store in Supabase using upsert operation
     const supabaseClient = createClient(
@@ -79,20 +86,22 @@ Deno.serve(async (req) => {
       .from('stock_prices')
       .upsert({
         symbol: stockData.symbol,
-        date: new Date(stockData.date).toISOString().split('T')[0], // Store only the date part
+        date: stockData.date,
         open_price: stockData.open,
         high_price: stockData.high,
         low_price: stockData.low,
         close_price: stockData.close,
         volume: stockData.volume
       }, {
-        onConflict: 'symbol,date' // Specify the columns that form the unique constraint
+        onConflict: 'symbol,date'
       })
 
     if (upsertError) {
       console.error('Error upserting data:', upsertError)
       throw upsertError
     }
+
+    console.log('Successfully stored data in Supabase')
 
     return new Response(JSON.stringify(stockData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
