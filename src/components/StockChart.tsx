@@ -40,12 +40,10 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
     }
 
     try {
-      // Format the symbol to match what the Edge Function expects
-      const formattedSymbol = selectedBank.replace('.NSE', '.NS');
-      console.log('Fetching data for symbol:', formattedSymbol);
+      console.log('Fetching data for symbol:', selectedBank);
 
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: JSON.stringify({ symbol: formattedSymbol }),
+        body: JSON.stringify({ symbol: selectedBank }),
         headers: {
           'Content-Type': 'application/json'
         }
