@@ -42,10 +42,11 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
     try {
       console.log('Fetching data for symbol:', selectedBank);
 
+      const requestBody = { symbol: selectedBank };
+      console.log('Request body:', requestBody);
+
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: JSON.stringify({ 
-          symbol: selectedBank.replace('.NSE', '.NS') // Convert to correct format for Alpha Vantage
-        }),
+        body: JSON.stringify(requestBody),
         headers: {
           'Content-Type': 'application/json'
         }
