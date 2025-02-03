@@ -12,7 +12,7 @@ import CommonAnalysis from '../components/CommonAnalysis';
 import MarketingAnalytics from '../components/MarketingAnalytics';
 
 const mockBankData = {
-  'SBIN.NS': {
+  'SBIN.NSE': {
     loanData: [
       { name: 'Corporate', value: 35 },
       { name: 'Retail', value: 40 },
@@ -25,7 +25,7 @@ const mockBankData = {
       semiUrban: 7300,
     },
   },
-  'AXISBANK.NS': {
+  'AXISBANK.NSE': {
     loanData: [
       { name: 'Corporate', value: 42 },
       { name: 'Retail', value: 35 },
@@ -38,7 +38,7 @@ const mockBankData = {
       semiUrban: 4700,
     },
   },
-  'HDFCBANK.NS': {
+  'HDFCBANK.NSE': {
     loanData: [
       { name: 'Corporate', value: 45 },
       { name: 'Retail', value: 38 },
@@ -51,7 +51,7 @@ const mockBankData = {
       semiUrban: 5500,
     },
   },
-  'KOTAKBANK.NS': {
+  'KOTAKBANK.NSE': {
     loanData: [
       { name: 'Corporate', value: 38 },
       { name: 'Retail', value: 42 },
@@ -64,7 +64,7 @@ const mockBankData = {
       semiUrban: 3800,
     },
   },
-  'ICICIBANK.NS': {
+  'ICICIBANK.NSE': {
     loanData: [
       { name: 'Corporate', value: 40 },
       { name: 'Retail', value: 37 },
@@ -80,7 +80,7 @@ const mockBankData = {
 };
 
 const Index = () => {
-  const [selectedBank, setSelectedBank] = useState('SBIN.NS');
+  const [selectedBank, setSelectedBank] = useState('SBIN.NSE');
   const [sentiment, setSentiment] = useState({ 
     sentiment: 'Neutral', 
     emoji: '➖', 

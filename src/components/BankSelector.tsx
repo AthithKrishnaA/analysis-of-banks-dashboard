@@ -9,11 +9,11 @@ import {
 import { Building2 } from "lucide-react";
 
 const banks = [
-  { id: 'SBIN.NS', name: 'State Bank of India', code: 'SBI' },
-  { id: 'AXISBANK.NS', name: 'Axis Bank', code: 'AXIS' },
-  { id: 'HDFCBANK.NS', name: 'HDFC Bank', code: 'HDFC' },
-  { id: 'KOTAKBANK.NS', name: 'Kotak Bank', code: 'KOTAK' },
-  { id: 'ICICIBANK.NS', name: 'ICICI Bank', code: 'ICICI' },
+  { id: 'SBIN.NSE', name: 'State Bank of India', code: 'SBI' },
+  { id: 'AXISBANK.NSE', name: 'Axis Bank', code: 'AXIS' },
+  { id: 'HDFCBANK.NSE', name: 'HDFC Bank', code: 'HDFC' },
+  { id: 'KOTAKBANK.NSE', name: 'Kotak Bank', code: 'KOTAK' },
+  { id: 'ICICIBANK.NSE', name: 'ICICI Bank', code: 'ICICI' },
 ];
 
 interface BankSelectorProps {
