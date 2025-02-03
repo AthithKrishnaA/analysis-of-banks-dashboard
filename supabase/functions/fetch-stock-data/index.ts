@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
-      headers: { ...corsHeaders }
+      headers: corsHeaders
     })
   }
 
@@ -31,12 +31,18 @@ Deno.serve(async (req) => {
     
     if (!apiKey) {
       console.error('API key not configured')
-      throw new Error('API key not configured')
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     if (!symbol) {
       console.error('No symbol provided')
-      throw new Error('Symbol is required')
+      return new Response(
+        JSON.stringify({ error: 'Symbol is required' }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Convert NSE symbol to BSE format for Alpha Vantage
@@ -53,18 +59,30 @@ Deno.serve(async (req) => {
     })
     
     if (!response.ok) {
-      throw new Error(`Alpha Vantage API error: ${response.status} ${response.statusText}`)
+      console.error('Alpha Vantage API error:', response.status, response.statusText)
+      return new Response(
+        JSON.stringify({ error: `Alpha Vantage API error: ${response.status} ${response.statusText}` }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
     
     const data = await response.json()
     console.log('Alpha Vantage response:', JSON.stringify(data))
     
     if (data['Error Message']) {
-      throw new Error(data['Error Message'])
+      console.error('Alpha Vantage error:', data['Error Message'])
+      return new Response(
+        JSON.stringify({ error: data['Error Message'] }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     if (!data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) {
-      throw new Error('No data available for this symbol')
+      console.error('No data available for symbol:', symbol)
+      return new Response(
+        JSON.stringify({ error: 'No data available for this symbol' }), 
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const quote = data['Global Quote']
@@ -104,19 +122,23 @@ Deno.serve(async (req) => {
 
     if (upsertError) {
       console.error('Error upserting data:', upsertError)
-      throw upsertError
+      return new Response(
+        JSON.stringify({ error: 'Failed to store stock data' }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     console.log('Successfully stored data in Supabase')
 
-    return new Response(JSON.stringify(stockData), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify(stockData),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   } catch (error) {
     console.error('Function error:', error)
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return new Response(
+      JSON.stringify({ error: error.message }), 
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
   }
 })
