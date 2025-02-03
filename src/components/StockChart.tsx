@@ -35,8 +35,12 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
 
   const fetchLatestPrice = async () => {
     try {
+      // Convert .NS to .NSE for Alpha Vantage
+      const symbol = selectedBank.replace('.NS', '.NSE');
+      console.log('Fetching data for symbol:', symbol);
+
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank }
+        body: { symbol }
       });
 
       if (error) throw error;
