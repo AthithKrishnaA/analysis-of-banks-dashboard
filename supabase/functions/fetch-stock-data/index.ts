@@ -5,17 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface StockData {
-  symbol: string;
-  date: string;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-  volume: number;
-}
-
 Deno.serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       headers: corsHeaders
@@ -23,8 +14,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Validate content type
     const contentType = req.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
+      console.error('Invalid content type:', contentType);
       return new Response(
         JSON.stringify({
           error: 'Invalid Content-Type',
@@ -37,9 +30,12 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Parse request body
     let requestData;
     try {
-      requestData = await req.json();
+      const text = await req.text();
+      console.log('Raw request body:', text);
+      requestData = JSON.parse(text);
       console.log('Parsed request data:', requestData);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
@@ -105,7 +101,7 @@ Deno.serve(async (req) => {
     }
 
     const data = await response.json();
-    console.log('Alpha Vantage response:', JSON.stringify(data));
+    console.log('Alpha Vantage response:', data);
 
     if (data['Error Message']) {
       return new Response(
@@ -134,14 +130,8 @@ Deno.serve(async (req) => {
     }
 
     const quote = data['Global Quote'];
-    const currentDate = new Date().toISOString();
-    
-    const stockData: StockData = {
-      symbol,
-      date: currentDate,
-      open: parseFloat(quote['02. open']),
-      high: parseFloat(quote['03. high']),
-      low: parseFloat(quote['04. low']),
+    const stockData = {
+      date: new Date().toISOString(),
       close: parseFloat(quote['05. price']),
       volume: parseInt(quote['06. volume'])
     };

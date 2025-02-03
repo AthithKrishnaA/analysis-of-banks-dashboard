@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -41,9 +41,12 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
 
     try {
       console.log('Fetching data for symbol:', selectedBank);
+      
+      const requestBody = JSON.stringify({ symbol: selectedBank });
+      console.log('Request body:', requestBody);
 
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: JSON.stringify({ symbol: selectedBank }),
+        body: requestBody,
         headers: {
           'Content-Type': 'application/json'
         }
@@ -65,8 +68,6 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
         console.error('No data received from API');
         return;
       }
-
-      console.log('Received stock data:', stockData);
 
       const newPrice = stockData.close;
       const timestamp = new Date(stockData.date).toLocaleTimeString();
