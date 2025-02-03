@@ -34,11 +34,16 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   const { toast } = useToast();
 
   const fetchLatestPrice = async () => {
+    if (!selectedBank) {
+      console.error('No bank selected');
+      return;
+    }
+
     try {
       console.log('Fetching data for symbol:', selectedBank);
 
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank },
+        body: JSON.stringify({ symbol: selectedBank }),
         headers: {
           'Content-Type': 'application/json'
         }
@@ -46,41 +51,51 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
 
       if (error) {
         console.error('Error fetching stock data:', error);
-        throw error;
-      }
-
-      if (stockData) {
-        const newPrice = stockData.close;
-        const timestamp = new Date(stockData.date).toLocaleTimeString();
-
-        setData(prevData => {
-          const newData = [...prevData, { date: timestamp, price: newPrice }].slice(-6);
-          
-          if (prevData.length > 0) {
-            const lastPrice = prevData[prevData.length - 1].price;
-            const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
-            
-            const newPriceChanges = [...priceChanges.slice(-5), priceChange];
-            setPriceChanges(newPriceChanges);
-            
-            if (Math.abs(priceChange) > 0.5) {
-              const sentiment = analyzeSentiment(newPriceChanges);
-              if (onSentimentUpdate) {
-                onSentimentUpdate(sentiment, newPriceChanges);
-              }
-              toast({
-                title: `${selectedBank} Market Update`,
-                description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
-                duration: 3000,
-              });
-            }
-          }
-          
-          return newData;
+        toast({
+          title: "Error",
+          description: "Failed to fetch latest stock price",
+          duration: 3000,
         });
+        return;
       }
+
+      if (!stockData) {
+        console.error('No data received from API');
+        return;
+      }
+
+      console.log('Received stock data:', stockData);
+
+      const newPrice = stockData.close;
+      const timestamp = new Date(stockData.date).toLocaleTimeString();
+
+      setData(prevData => {
+        const newData = [...prevData, { date: timestamp, price: newPrice }].slice(-6);
+        
+        if (prevData.length > 0) {
+          const lastPrice = prevData[prevData.length - 1].price;
+          const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
+          
+          const newPriceChanges = [...priceChanges.slice(-5), priceChange];
+          setPriceChanges(newPriceChanges);
+          
+          if (Math.abs(priceChange) > 0.5) {
+            const sentiment = analyzeSentiment(newPriceChanges);
+            if (onSentimentUpdate) {
+              onSentimentUpdate(sentiment, newPriceChanges);
+            }
+            toast({
+              title: `${selectedBank} Market Update`,
+              description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
+              duration: 3000,
+            });
+          }
+        }
+        
+        return newData;
+      });
     } catch (error) {
-      console.error('Error fetching stock data:', error);
+      console.error('Error in fetchLatestPrice:', error);
       toast({
         title: "Error",
         description: "Failed to fetch latest stock price",
@@ -90,13 +105,19 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   };
 
   useEffect(() => {
-    // Initial fetch
-    fetchLatestPrice();
-    
-    // Set up polling every 5 seconds
-    const interval = setInterval(fetchLatestPrice, 5000);
-    
-    return () => clearInterval(interval);
+    if (selectedBank) {
+      // Clear existing data when bank changes
+      setData([]);
+      setPriceChanges([]);
+      
+      // Initial fetch
+      fetchLatestPrice();
+      
+      // Set up polling every 5 seconds
+      const interval = setInterval(fetchLatestPrice, 5000);
+      
+      return () => clearInterval(interval);
+    }
   }, [selectedBank]);
 
   const priceChange = data.length >= 2 
