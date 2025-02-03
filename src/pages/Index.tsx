@@ -11,76 +11,8 @@ import BankRiskMetrics from '../components/BankRiskMetrics';
 import CommonAnalysis from '../components/CommonAnalysis';
 import MarketingAnalytics from '../components/MarketingAnalytics';
 
-const mockBankData = {
-  'SBIN.NSE': {
-    loanData: [
-      { name: 'Corporate', value: 35 },
-      { name: 'Retail', value: 40 },
-      { name: 'SME', value: 15 },
-      { name: 'Agriculture', value: 10 },
-    ],
-    branchData: {
-      rural: 8500,
-      urban: 6200,
-      semiUrban: 7300,
-    },
-  },
-  'AXISBANK.NSE': {
-    loanData: [
-      { name: 'Corporate', value: 42 },
-      { name: 'Retail', value: 35 },
-      { name: 'SME', value: 13 },
-      { name: 'Agriculture', value: 10 },
-    ],
-    branchData: {
-      rural: 4200,
-      urban: 5100,
-      semiUrban: 4700,
-    },
-  },
-  'HDFCBANK.NSE': {
-    loanData: [
-      { name: 'Corporate', value: 45 },
-      { name: 'Retail', value: 38 },
-      { name: 'SME', value: 12 },
-      { name: 'Agriculture', value: 5 },
-    ],
-    branchData: {
-      rural: 5200,
-      urban: 6800,
-      semiUrban: 5500,
-    },
-  },
-  'KOTAKBANK.NSE': {
-    loanData: [
-      { name: 'Corporate', value: 38 },
-      { name: 'Retail', value: 42 },
-      { name: 'SME', value: 14 },
-      { name: 'Agriculture', value: 6 },
-    ],
-    branchData: {
-      rural: 3200,
-      urban: 4500,
-      semiUrban: 3800,
-    },
-  },
-  'ICICIBANK.NSE': {
-    loanData: [
-      { name: 'Corporate', value: 40 },
-      { name: 'Retail', value: 37 },
-      { name: 'SME', value: 15 },
-      { name: 'Agriculture', value: 8 },
-    ],
-    branchData: {
-      rural: 5800,
-      urban: 5900,
-      semiUrban: 5200,
-    },
-  },
-};
-
 const Index = () => {
-  const [selectedBank, setSelectedBank] = useState('SBIN.NSE');
+  const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const [sentiment, setSentiment] = useState({ 
     sentiment: 'Neutral', 
     emoji: '➖', 
