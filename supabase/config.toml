@@ -26,5 +26,5 @@ enabled = true
 enabled = true
 
 [[functions]]
-name = "fetch-stock-data"
+[functions.fetch-stock-data]
 verify_jwt = false
