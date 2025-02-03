@@ -42,15 +42,14 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
     try {
       console.log('Fetching data for symbol:', selectedBank);
 
-      const requestBody = JSON.stringify({ symbol: selectedBank });
-      console.log('Request body:', requestBody);
-
       const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank },
+        body: JSON.stringify({ symbol: selectedBank }),
         headers: {
           'Content-Type': 'application/json'
         }
       });
+
+      console.log('Response from edge function:', { stockData, error });
 
       if (error) {
         console.error('Error fetching stock data:', error);
