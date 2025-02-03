@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/components/ui/use-toast";
 import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 interface StockDataPoint {
   date: string;
@@ -12,31 +13,6 @@ interface StockChartProps {
   selectedBank: string;
   onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void;
 }
-
-const bankInitialPrices = {
-  'SBIN.NS': 580,
-  'AXISBANK.NS': 1120,
-  'HDFCBANK.NS': 1450,
-  'KOTAKBANK.NS': 1780,
-  'ICICIBANK.NS': 980,
-};
-
-const generateInitialData = (basePrice: number) => {
-  const hours = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00'];
-  return hours.map((hour, index) => {
-    const variation = (Math.random() - 0.5) * 20;
-    return {
-      date: hour,
-      price: Math.round((basePrice + variation) * 100) / 100
-    };
-  });
-};
-
-const generateNewPrice = (lastPrice: number) => {
-  const changePercent = (Math.random() - 0.5) * 2;
-  const newPrice = lastPrice * (1 + changePercent / 100);
-  return Math.round(newPrice * 100) / 100;
-};
 
 const analyzeSentiment = (priceChanges: number[]) => {
   const averageChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
@@ -57,47 +33,63 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const basePrice = bankInitialPrices[selectedBank];
-    setData(generateInitialData(basePrice));
-    setPriceChanges([]);
-    console.log(`Initialized price history for ${selectedBank}`);
-  }, [selectedBank]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prevData => {
-        if (!prevData.length) return prevData;
-        
-        const lastPrice = prevData[prevData.length - 1].price;
-        const newPrice = generateNewPrice(lastPrice);
-        const now = new Date();
-        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
-                       now.getMinutes().toString().padStart(2, '0');
-        
-        const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
-        const newPriceChanges = [...priceChanges.slice(-5), priceChange];
-        setPriceChanges(newPriceChanges);
-        
-        if (Math.abs(priceChange) > 0.5) {
-          const sentiment = analyzeSentiment(newPriceChanges);
-          if (onSentimentUpdate) {
-            onSentimentUpdate(sentiment, newPriceChanges);
-          }
-          toast({
-            title: `${selectedBank} Market Update`,
-            description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
-            duration: 3000,
-          });
-        }
-
-        const newData = [...prevData.slice(-5), { date: timeStr, price: newPrice }];
-        return newData;
+  const fetchLatestPrice = async () => {
+    try {
+      const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
+        body: { symbol: selectedBank }
       });
-    }, 5000);
 
+      if (error) throw error;
+
+      if (stockData) {
+        const newPrice = stockData.close;
+        const timestamp = new Date(stockData.date).toLocaleTimeString();
+
+        setData(prevData => {
+          const newData = [...prevData, { date: timestamp, price: newPrice }].slice(-6);
+          
+          if (prevData.length > 0) {
+            const lastPrice = prevData[prevData.length - 1].price;
+            const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
+            
+            const newPriceChanges = [...priceChanges.slice(-5), priceChange];
+            setPriceChanges(newPriceChanges);
+            
+            if (Math.abs(priceChange) > 0.5) {
+              const sentiment = analyzeSentiment(newPriceChanges);
+              if (onSentimentUpdate) {
+                onSentimentUpdate(sentiment, newPriceChanges);
+              }
+              toast({
+                title: `${selectedBank} Market Update`,
+                description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
+                duration: 3000,
+              });
+            }
+          }
+          
+          return newData;
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching stock data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch latest stock price",
+        duration: 3000,
+      });
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch
+    fetchLatestPrice();
+    
+    // Set up polling every 5 seconds
+    const interval = setInterval(fetchLatestPrice, 5000);
+    
     return () => clearInterval(interval);
-  }, [selectedBank, toast, priceChanges, onSentimentUpdate]);
+  }, [selectedBank]);
 
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 

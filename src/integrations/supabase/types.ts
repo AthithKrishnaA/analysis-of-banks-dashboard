@@ -9,7 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      stock_prices: {
+        Row: {
+          close_price: number | null
+          created_at: string
+          date: string
+          high_price: number | null
+          id: number
+          low_price: number | null
+          open_price: number | null
+          symbol: string
+          updated_at: string
+          volume: number | null
+        }
+        Insert: {
+          close_price?: number | null
+          created_at?: string
+          date: string
+          high_price?: number | null
+          id?: never
+          low_price?: number | null
+          open_price?: number | null
+          symbol: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Update: {
+          close_price?: number | null
+          created_at?: string
+          date?: string
+          high_price?: number | null
+          id?: never
+          low_price?: number | null
+          open_price?: number | null
+          symbol?: string
+          updated_at?: string
+          volume?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
