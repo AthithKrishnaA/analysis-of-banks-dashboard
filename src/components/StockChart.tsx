@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
 
 interface StockDataPoint {
   date: string;
@@ -33,44 +32,43 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
 
-  const fetchLatestPrice = async () => {
+  const generateMockPrice = (basePrice: number) => {
+    const randomChange = (Math.random() - 0.5) * 10;
+    return basePrice + randomChange;
+  };
+
+  const fetchLatestPrice = () => {
     if (!selectedBank) {
       console.error('No bank selected');
       return;
     }
 
     try {
-      console.log('Fetching data for symbol:', selectedBank);
+      console.log('Generating mock data for:', selectedBank);
       
-      const requestBody = { symbol: selectedBank };
-      console.log('Request body:', requestBody);
-
-      const { data: stockData, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: requestBody,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('Response from edge function:', { stockData, error });
-
-      if (error) {
-        console.error('Error fetching stock data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to fetch latest stock price",
-          duration: 3000,
-        });
-        return;
+      let basePrice;
+      switch(selectedBank) {
+        case 'SBIN.NS':
+          basePrice = 620;
+          break;
+        case 'HDFCBANK.NS':
+          basePrice = 1450;
+          break;
+        case 'ICICIBANK.NS':
+          basePrice = 980;
+          break;
+        case 'AXISBANK.NS':
+          basePrice = 1120;
+          break;
+        case 'KOTAKBANK.NS':
+          basePrice = 1780;
+          break;
+        default:
+          basePrice = 1000;
       }
 
-      if (!stockData) {
-        console.error('No data received from API');
-        return;
-      }
-
-      const newPrice = stockData.close;
-      const timestamp = new Date(stockData.date).toLocaleTimeString();
+      const newPrice = generateMockPrice(basePrice);
+      const timestamp = new Date().toLocaleTimeString();
 
       setData(prevData => {
         const newData = [...prevData, { date: timestamp, price: newPrice }].slice(-6);
