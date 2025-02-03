@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       volume: parseInt(quote['06. volume'])
     }
 
-    // Store in Supabase
+    // Store in Supabase using upsert operation
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -79,12 +79,14 @@ Deno.serve(async (req) => {
       .from('stock_prices')
       .upsert({
         symbol: stockData.symbol,
-        date: new Date(stockData.date).toISOString(),
+        date: new Date(stockData.date).toISOString().split('T')[0], // Store only the date part
         open_price: stockData.open,
         high_price: stockData.high,
         low_price: stockData.low,
         close_price: stockData.close,
         volume: stockData.volume
+      }, {
+        onConflict: 'symbol,date' // Specify the columns that form the unique constraint
       })
 
     if (upsertError) {
