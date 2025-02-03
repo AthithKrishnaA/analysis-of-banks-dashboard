@@ -24,11 +24,11 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Parse request body with better error handling
+    const text = await req.text();
+    console.log('Raw request body:', text);
+
     let requestBody;
     try {
-      const text = await req.text();
-      console.log('Raw request body:', text);
       requestBody = text ? JSON.parse(text) : {};
     } catch (parseError) {
       console.error('Error parsing request body:', parseError);
@@ -48,10 +48,12 @@ Deno.serve(async (req) => {
     console.log('Processing request for symbol:', symbol);
 
     if (!symbol) {
+      console.error('No symbol provided in request body');
       return new Response(
         JSON.stringify({ 
           error: 'Symbol is required',
-          details: 'No symbol provided in request body'
+          details: 'No symbol provided in request body',
+          receivedBody: requestBody
         }), 
         { 
           status: 400,
@@ -75,12 +77,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Convert symbol format for Alpha Vantage
-    const alphaVantageSymbol = symbol.replace('.NSE', '.BSE');
-    console.log('Converted symbol for Alpha Vantage:', alphaVantageSymbol);
-
-    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${alphaVantageSymbol}&apikey=${apiKey}`;
-    console.log('Fetching data from Alpha Vantage');
+    console.log('Fetching data from Alpha Vantage for symbol:', symbol);
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
 
     const response = await fetch(url);
     if (!response.ok) {
