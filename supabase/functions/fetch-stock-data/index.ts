@@ -33,9 +33,7 @@ Deno.serve(async (req) => {
     // Parse request body
     let requestData;
     try {
-      const text = await req.text();
-      console.log('Raw request body:', text);
-      requestData = JSON.parse(text);
+      requestData = await req.json();
       console.log('Parsed request data:', requestData);
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
