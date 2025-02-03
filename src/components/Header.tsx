@@ -7,7 +7,7 @@ interface HeaderProps {
 }
 
 const bankInfo = {
-  'SBIN.NS': {
+  'SBIN.NSE': {
     name: 'State Bank of India',
     price: '621.90',
     change: '+8.45',
@@ -15,7 +15,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '22,000+'
   },
-  'AXISBANK.NS': {
+  'AXISBANK.NSE': {
     name: 'Axis Bank',
     price: '1,123.45',
     change: '+15.30',
@@ -23,7 +23,7 @@ const bankInfo = {
     creditRating: 'AA+',
     branches: '15,000+'
   },
-  'HDFCBANK.NS': {
+  'HDFCBANK.NSE': {
     name: 'HDFC Bank',
     price: '1,456.75',
     change: '+21.50',
@@ -31,7 +31,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '18,000+'
   },
-  'KOTAKBANK.NS': {
+  'KOTAKBANK.NSE': {
     name: 'Kotak Bank',
     price: '1,789.60',
     change: '-12.40',
@@ -39,7 +39,7 @@ const bankInfo = {
     creditRating: 'AAA',
     branches: '12,000+'
   },
-  'ICICIBANK.NS': {
+  'ICICIBANK.NSE': {
     name: 'ICICI Bank',
     price: '987.30',
     change: '+18.75',
