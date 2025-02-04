@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 interface MarketingAnalyticsProps {
   selectedBank: string;
@@ -28,48 +28,68 @@ const getBankNameFromSymbol = (symbol: string) => {
 // Generate campaign data for the last 12 months up to current date
 const generateCampaignData = () => {
   const currentDate = new Date();
+  const baseValues = {
+    'HDFC Bank': 85,
+    'State Bank of India': 78,
+    'ICICI Bank': 82,
+    'Axis Bank': 75,
+    'Kotak Bank': 72
+  };
+  
   return Array.from({ length: 12 }, (_, i) => {
     const date = new Date(currentDate);
     date.setMonth(currentDate.getMonth() - (11 - i));
-    return {
-      month: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
-      'HDFC Bank': Math.random() * 100 + 50,
-      'State Bank of India': Math.random() * 100 + 40,
-      'ICICI Bank': Math.random() * 100 + 45,
-      'Axis Bank': Math.random() * 100 + 35,
-      'Kotak Bank': Math.random() * 100 + 30,
+    const monthData = {
+      month: date.toLocaleString('default', { month: 'short', year: '2-digit' })
     };
+
+    Object.entries(baseValues).forEach(([bank, base]) => {
+      const trend = Math.sin(i / 2) * 10; // Create a wave pattern
+      const random = Math.random() * 15 - 7.5; // Random variation
+      monthData[bank] = Math.max(50, Math.min(100, base + trend + random));
+    });
+
+    return monthData;
   });
 };
 
 const channelData = [
-  { channel: 'Social Media', value: 35 },
-  { channel: 'Email', value: 25 },
-  { channel: 'Search', value: 20 },
-  { channel: 'Display', value: 15 },
-  { channel: 'Other', value: 5 },
+  { channel: 'Social Media', value: 35, color: '#0088FE' },
+  { channel: 'Email Marketing', value: 25, color: '#00C49F' },
+  { channel: 'Search Engine', value: 20, color: '#FFBB28' },
+  { channel: 'Display Ads', value: 15, color: '#FF8042' },
+  { channel: 'Content Marketing', value: 5, color: '#8884d8' },
 ];
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
-
-// Generate conversion data for the last 6 months up to current date
+// Generate conversion data with more realistic patterns
 const generateConversionData = () => {
   const currentDate = new Date();
+  const baseRates = {
+    'HDFC Bank': 3.8,
+    'State Bank of India': 3.5,
+    'ICICI Bank': 3.6,
+    'Axis Bank': 3.4,
+    'Kotak Bank': 3.3
+  };
+  
   return Array.from({ length: 6 }, (_, i) => {
     const date = new Date(currentDate);
     date.setMonth(currentDate.getMonth() - (5 - i));
-    return {
-      month: date.toLocaleString('default', { month: 'short', year: '2-digit' }),
-      'HDFC Bank': (Math.random() * 2 + 2).toFixed(2),
-      'State Bank of India': (Math.random() * 2 + 1.8).toFixed(2),
-      'ICICI Bank': (Math.random() * 2 + 1.9).toFixed(2),
-      'Axis Bank': (Math.random() * 2 + 1.7).toFixed(2),
-      'Kotak Bank': (Math.random() * 2 + 1.6).toFixed(2),
+    const monthData = {
+      month: date.toLocaleString('default', { month: 'short', year: '2-digit' })
     };
+
+    Object.entries(baseRates).forEach(([bank, base]) => {
+      const seasonality = Math.cos(i / 2) * 0.3; // Seasonal variation
+      const trend = i * 0.1; // Upward trend
+      const random = (Math.random() - 0.5) * 0.4; // Random noise
+      monthData[bank] = (base + seasonality + trend + random).toFixed(2);
+    });
+
+    return monthData;
   });
 };
 
-// Generate acquisition costs data
 const generateAcquisitionCosts = () => {
   return {
     'HDFC Bank': {
@@ -101,7 +121,6 @@ const generateAcquisitionCosts = () => {
 };
 
 const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
-  // Generate fresh data on each render
   const campaignData = generateCampaignData();
   const conversionData = generateConversionData();
   const acquisitionCosts = generateAcquisitionCosts();
@@ -122,6 +141,7 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
+              <Legend />
               {Object.entries(bankColors).map(([bank, color]) => (
                 <Line
                   key={bank}
@@ -156,10 +176,11 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
                 dataKey="value"
               >
                 {channelData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip />
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
         </CardContent>
@@ -176,6 +197,7 @@ const MarketingAnalytics = ({ selectedBank }: MarketingAnalyticsProps) => {
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
+              <Legend />
               {Object.entries(bankColors).map(([bank, color]) => (
                 <Bar
                   key={bank}
