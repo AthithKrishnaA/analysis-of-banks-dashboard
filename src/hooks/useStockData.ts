@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
 
 interface StockDataPoint {
@@ -8,51 +7,47 @@ interface StockDataPoint {
   price: number;
 }
 
+const baseValues = {
+  'SBIN.NS': 778.10,
+  'AXISBANK.NS': 1013.00,
+  'HDFCBANK.NS': 1714.00,
+  'KOTAKBANK.NS': 1910.00,
+  'ICICIBANK.NS': 1267.00
+};
+
 export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
 
-  const fetchLatestPrice = async () => {
-    if (!selectedBank) {
-      console.error('No bank selected');
-      return;
-    }
+  const generateMockPrice = (basePrice: number) => {
+    const volatility = 0.002; // 0.2% volatility
+    const change = basePrice * volatility * (Math.random() - 0.5);
+    return basePrice + change;
+  };
 
+  const fetchMockData = () => {
     try {
-      console.log('Fetching data for:', selectedBank);
+      console.log('Generating mock data for:', selectedBank);
+      const basePrice = baseValues[selectedBank];
       
-      const { data: response, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank }
+      // Generate new price point
+      const newPrice = generateMockPrice(basePrice);
+      const timestamp = new Date().toLocaleTimeString();
+
+      // Update data points
+      setData(prevData => {
+        const newData = [...prevData, { date: timestamp, price: newPrice }];
+        return newData.slice(-6); // Keep last 6 points
       });
 
-      if (error) {
-        console.error('Error fetching stock data:', error);
-        throw error;
-      }
-
-      const timeSeries = response['Time Series (5min)'];
-      if (!timeSeries) {
-        console.error('No time series data received');
-        return;
-      }
-
-      const latestDataPoints = Object.entries(timeSeries)
-        .slice(0, 6)
-        .map(([timestamp, values]: [string, any]) => ({
-          date: new Date(timestamp).toLocaleTimeString(),
-          price: parseFloat(values['4. close'])
-        }))
-        .reverse();
-
-      setData(latestDataPoints);
-
-      if (latestDataPoints.length >= 2) {
-        const priceChange = ((latestDataPoints[latestDataPoints.length - 1].price - latestDataPoints[latestDataPoints.length - 2].price) / latestDataPoints[latestDataPoints.length - 2].price) * 100;
+      // Calculate price change
+      if (data.length >= 2) {
+        const priceChange = ((newPrice - data[data.length - 1].price) / data[data.length - 1].price) * 100;
         const newPriceChanges = [...priceChanges.slice(-5), priceChange];
         setPriceChanges(newPriceChanges);
 
-        if (Math.abs(priceChange) > 0.5) {
+        if (Math.abs(priceChange) > 0.1) {
           const sentiment = analyzeSentiment(newPriceChanges);
           if (onSentimentUpdate) {
             onSentimentUpdate(sentiment, newPriceChanges);
@@ -65,10 +60,10 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
         }
       }
     } catch (error) {
-      console.error('Error in fetchLatestPrice:', error);
+      console.error('Error generating mock data:', error);
       toast({
         title: "Error",
-        description: "Failed to fetch latest stock price",
+        description: "Failed to update stock price",
         duration: 3000,
       });
     }
@@ -78,8 +73,12 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     if (selectedBank) {
       setData([]);
       setPriceChanges([]);
-      fetchLatestPrice();
-      const interval = setInterval(fetchLatestPrice, 5000);
+      // Initial data point
+      const basePrice = baseValues[selectedBank];
+      setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
+      
+      // Set up interval for live updates
+      const interval = setInterval(fetchMockData, 5000);
       return () => clearInterval(interval);
     }
   }, [selectedBank]);

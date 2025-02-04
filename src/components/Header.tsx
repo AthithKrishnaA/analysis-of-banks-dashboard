@@ -9,41 +9,41 @@ interface HeaderProps {
 const bankInfo = {
   'SBIN.NS': {
     name: 'State Bank of India',
-    price: '621.90',
-    change: '+8.45',
-    changePercent: '+1.38',
+    price: '778.10',
+    change: '+12.45',
+    changePercent: '+1.63',
     creditRating: 'AAA',
     branches: '22,000+'
   },
   'AXISBANK.NS': {
     name: 'Axis Bank',
-    price: '1,123.45',
+    price: '1013.00',
     change: '+15.30',
-    changePercent: '+1.42',
+    changePercent: '+1.53',
     creditRating: 'AA+',
     branches: '15,000+'
   },
   'HDFCBANK.NS': {
     name: 'HDFC Bank',
-    price: '1,456.75',
+    price: '1714.00',
     change: '+21.50',
-    changePercent: '+1.65',
+    changePercent: '+1.27',
     creditRating: 'AAA',
     branches: '18,000+'
   },
   'KOTAKBANK.NS': {
     name: 'Kotak Bank',
-    price: '1,789.60',
-    change: '-12.40',
-    changePercent: '-0.89',
+    price: '1910.00',
+    change: '+18.40',
+    changePercent: '+0.97',
     creditRating: 'AAA',
     branches: '12,000+'
   },
   'ICICIBANK.NS': {
     name: 'ICICI Bank',
-    price: '987.30',
+    price: '1267.00',
     change: '+18.75',
-    changePercent: '+1.94',
+    changePercent: '+1.50',
     creditRating: 'AAA',
     branches: '16,000+'
   }
