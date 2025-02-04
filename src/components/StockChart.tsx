@@ -1,141 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { useToast } from "@/hooks/use-toast";
-import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
-
-interface StockDataPoint {
-  date: string;
-  price: number;
-}
+import ChartHeader from './ChartHeader';
+import { useStockData } from '@/hooks/useStockData';
 
 interface StockChartProps {
   selectedBank: string;
   onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void;
 }
 
-const analyzeSentiment = (priceChanges: number[]) => {
-  const averageChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
-  const volatility = Math.sqrt(
-    priceChanges.reduce((sum, change) => sum + Math.pow(change - averageChange, 2), 0) / priceChanges.length
-  );
-
-  if (averageChange > 0.5 && volatility < 1) return { sentiment: 'Bullish', emoji: '🚀', color: 'text-green-600' };
-  if (averageChange > 0.2) return { sentiment: 'Slightly Bullish', emoji: '📈', color: 'text-green-500' };
-  if (averageChange < -0.5 && volatility < 1) return { sentiment: 'Bearish', emoji: '📉', color: 'text-red-600' };
-  if (averageChange < -0.2) return { sentiment: 'Slightly Bearish', emoji: '🔻', color: 'text-red-500' };
-  if (volatility > 1.5) return { sentiment: 'Volatile', emoji: '⚡', color: 'text-yellow-500' };
-  return { sentiment: 'Neutral', emoji: '➖', color: 'text-gray-500' };
-};
-
 const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
-  const [data, setData] = useState<StockDataPoint[]>([]);
-  const [priceChanges, setPriceChanges] = useState<number[]>([]);
-  const { toast } = useToast();
-
-  const fetchLatestPrice = async () => {
-    if (!selectedBank) {
-      console.error('No bank selected');
-      return;
-    }
-
-    try {
-      console.log('Fetching data for:', selectedBank);
-      
-      const { data: response, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: { symbol: selectedBank }
-      });
-
-      if (error) {
-        console.error('Error fetching stock data:', error);
-        throw error;
-      }
-
-      const timeSeries = response['Time Series (5min)'];
-      if (!timeSeries) {
-        console.error('No time series data received');
-        return;
-      }
-
-      const latestDataPoints = Object.entries(timeSeries)
-        .slice(0, 6)
-        .map(([timestamp, values]: [string, any]) => ({
-          date: new Date(timestamp).toLocaleTimeString(),
-          price: parseFloat(values['4. close'])
-        }))
-        .reverse();
-
-      setData(latestDataPoints);
-
-      if (latestDataPoints.length >= 2) {
-        const priceChange = ((latestDataPoints[latestDataPoints.length - 1].price - latestDataPoints[latestDataPoints.length - 2].price) / latestDataPoints[latestDataPoints.length - 2].price) * 100;
-        const newPriceChanges = [...priceChanges.slice(-5), priceChange];
-        setPriceChanges(newPriceChanges);
-
-        if (Math.abs(priceChange) > 0.5) {
-          const sentiment = analyzeSentiment(newPriceChanges);
-          if (onSentimentUpdate) {
-            onSentimentUpdate(sentiment, newPriceChanges);
-          }
-          toast({
-            title: `${selectedBank} Market Update`,
-            description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
-            duration: 3000,
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error in fetchLatestPrice:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch latest stock price",
-        duration: 3000,
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (selectedBank) {
-      // Clear existing data when bank changes
-      setData([]);
-      setPriceChanges([]);
-      
-      // Initial fetch
-      fetchLatestPrice();
-      
-      // Set up polling every 5 seconds
-      const interval = setInterval(fetchLatestPrice, 5000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [selectedBank]);
-
-  const priceChange = data.length >= 2 
-    ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
-    : 0;
-
-  const sentiment = analyzeSentiment(priceChanges);
+  const { data, priceChange, sentiment } = useStockData(selectedBank, onSentimentUpdate);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm h-[400px]">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl font-semibold text-bank-primary">Live Price History</h2>
-          <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${sentiment.color} bg-opacity-10`}>
-            <Gauge className="h-4 w-4" />
-            <span>{sentiment.emoji} {sentiment.sentiment}</span>
-          </div>
-        </div>
-        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-          priceChange > 0 ? 'bg-green-100 text-green-800' : 
-          priceChange < 0 ? 'bg-red-100 text-red-800' : 
-          'bg-gray-100 text-gray-800'
-        }`}>
-          {priceChange > 0 ? <TrendingUp className="h-4 w-4 inline mr-1" /> : 
-           priceChange < 0 ? <TrendingDown className="h-4 w-4 inline mr-1" /> : '•'} 
-          {Math.abs(priceChange).toFixed(2)}%
-        </div>
-      </div>
+      <ChartHeader sentiment={sentiment} priceChange={priceChange} />
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>
