@@ -2,13 +2,49 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
-import { bankColors } from './constants';
+import { bankColors, baseValues } from './constants';
 
 interface VolumeChartProps {
-  volumePredictions: any[];
+  selectedBank: string;
 }
 
-const VolumeChart = ({ volumePredictions }: VolumeChartProps) => {
+const VolumeChart = ({ selectedBank }: VolumeChartProps) => {
+  const generateVolumePredictions = () => {
+    const predictions = [];
+    const startDate = new Date();
+    
+    // Base volumes relative to price and market cap
+    const baseVolumes = Object.entries(baseValues).reduce((acc, [bank, price]) => ({
+      ...acc,
+      [bank]: Math.round(price * 1000 * (Math.random() * 0.3 + 0.7))
+    }), {} as { [key: string]: number });
+
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      
+      const dataPoint: any = {
+        date: date.toISOString().split('T')[0],
+      };
+
+      Object.entries(baseVolumes).forEach(([bank, baseVolume]) => {
+        // Add weekly pattern (higher volumes mid-week)
+        const dayOfWeek = date.getDay();
+        const weekPattern = Math.sin((dayOfWeek / 7) * Math.PI) * 0.2 + 1;
+        
+        // Add random variation
+        const variation = (Math.random() * 0.4 + 0.8) * weekPattern;
+        dataPoint[bank] = Math.round(baseVolume * variation);
+      });
+
+      predictions.push(dataPoint);
+    }
+    
+    return predictions;
+  };
+
+  const volumePredictions = generateVolumePredictions();
+
   return (
     <Card>
       <CardHeader>
@@ -25,8 +61,13 @@ const VolumeChart = ({ volumePredictions }: VolumeChartProps) => {
                 day: 'numeric'
               })}
             />
-            <YAxis />
-            <Tooltip content={<CustomTooltip />} />
+            <YAxis 
+              tickFormatter={(value) => `${(value / 1000).toFixed(0)}K`}
+            />
+            <Tooltip 
+              content={<CustomTooltip />}
+              formatter={(value: number) => [`${(value / 1000).toFixed(1)}K`, 'Volume']}
+            />
             <Legend />
             {Object.entries(bankColors).map(([bank, color]) => (
               <Area
@@ -37,6 +78,7 @@ const VolumeChart = ({ volumePredictions }: VolumeChartProps) => {
                 stroke={color}
                 fill={color}
                 name={bank}
+                opacity={bank === selectedBank ? 0.8 : 0.3}
               />
             ))}
           </AreaChart>
