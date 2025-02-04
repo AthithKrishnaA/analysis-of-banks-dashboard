@@ -1,15 +1,39 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { CustomTooltip } from './CustomTooltip';
-import { bankColors, bankSymbolToName } from './constants';
+import { bankColors, bankSymbolToName, baseValues, volatilityFactors } from './constants';
 
 interface ConfidenceIntervalsProps {
-  confidenceIntervals: any[];
   selectedBank: string;
 }
 
-const ConfidenceIntervals = ({ confidenceIntervals, selectedBank }: ConfidenceIntervalsProps) => {
+const ConfidenceIntervals = ({ selectedBank }: ConfidenceIntervalsProps) => {
+  const confidenceIntervals = useMemo(() => {
+    const bankName = bankSymbolToName[selectedBank];
+    const predictions = [];
+    const startDate = new Date();
+    const baseValue = baseValues[bankName];
+    const volatility = volatilityFactors[bankName];
+    
+    for (let i = 0; i < 30; i++) {
+      const date = new Date(startDate);
+      date.setDate(date.getDate() + i);
+      
+      const uncertainty = i * volatility * baseValue;
+      const predictedValue = baseValue + Math.sin(i / 5) * (baseValue * 0.05) + i * (baseValue * 0.002);
+      
+      predictions.push({
+        date: date.toISOString(),
+        [bankName]: predictedValue,
+        'Upper Bound': predictedValue + uncertainty,
+        'Lower Bound': predictedValue - uncertainty,
+      });
+    }
+    
+    return predictions;
+  }, [selectedBank]);
+
   return (
     <Card>
       <CardHeader>
