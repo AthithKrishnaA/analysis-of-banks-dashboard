@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, TrendingDown, Gauge } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 interface StockDataPoint {
   date: string;
@@ -32,69 +33,57 @@ const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const { toast } = useToast();
 
-  const generateMockPrice = (basePrice: number) => {
-    const randomChange = (Math.random() - 0.5) * 10;
-    return basePrice + randomChange;
-  };
-
-  const fetchLatestPrice = () => {
+  const fetchLatestPrice = async () => {
     if (!selectedBank) {
       console.error('No bank selected');
       return;
     }
 
     try {
-      console.log('Generating mock data for:', selectedBank);
+      console.log('Fetching data for:', selectedBank);
       
-      let basePrice;
-      switch(selectedBank) {
-        case 'SBIN.NS':
-          basePrice = 620;
-          break;
-        case 'HDFCBANK.NS':
-          basePrice = 1450;
-          break;
-        case 'ICICIBANK.NS':
-          basePrice = 980;
-          break;
-        case 'AXISBANK.NS':
-          basePrice = 1120;
-          break;
-        case 'KOTAKBANK.NS':
-          basePrice = 1780;
-          break;
-        default:
-          basePrice = 1000;
+      const { data: response, error } = await supabase.functions.invoke('fetch-stock-data', {
+        body: { symbol: selectedBank }
+      });
+
+      if (error) {
+        console.error('Error fetching stock data:', error);
+        throw error;
       }
 
-      const newPrice = generateMockPrice(basePrice);
-      const timestamp = new Date().toLocaleTimeString();
+      const timeSeries = response['Time Series (5min)'];
+      if (!timeSeries) {
+        console.error('No time series data received');
+        return;
+      }
 
-      setData(prevData => {
-        const newData = [...prevData, { date: timestamp, price: newPrice }].slice(-6);
-        
-        if (prevData.length > 0) {
-          const lastPrice = prevData[prevData.length - 1].price;
-          const priceChange = ((newPrice - lastPrice) / lastPrice) * 100;
-          
-          const newPriceChanges = [...priceChanges.slice(-5), priceChange];
-          setPriceChanges(newPriceChanges);
-          
-          if (Math.abs(priceChange) > 0.5) {
-            const sentiment = analyzeSentiment(newPriceChanges);
-            if (onSentimentUpdate) {
-              onSentimentUpdate(sentiment, newPriceChanges);
-            }
-            toast({
-              title: `${selectedBank} Market Update`,
-              description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
-              duration: 3000,
-            });
+      const latestDataPoints = Object.entries(timeSeries)
+        .slice(0, 6)
+        .map(([timestamp, values]: [string, any]) => ({
+          date: new Date(timestamp).toLocaleTimeString(),
+          price: parseFloat(values['4. close'])
+        }))
+        .reverse();
+
+      setData(latestDataPoints);
+
+      if (latestDataPoints.length >= 2) {
+        const priceChange = ((latestDataPoints[latestDataPoints.length - 1].price - latestDataPoints[latestDataPoints.length - 2].price) / latestDataPoints[latestDataPoints.length - 2].price) * 100;
+        const newPriceChanges = [...priceChanges.slice(-5), priceChange];
+        setPriceChanges(newPriceChanges);
+
+        if (Math.abs(priceChange) > 0.5) {
+          const sentiment = analyzeSentiment(newPriceChanges);
+          if (onSentimentUpdate) {
+            onSentimentUpdate(sentiment, newPriceChanges);
           }
+          toast({
+            title: `${selectedBank} Market Update`,
+            description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
+            duration: 3000,
+          });
         }
-        
-        return newData;
-      });
+      }
     } catch (error) {
       console.error('Error in fetchLatestPrice:', error);
       toast({
