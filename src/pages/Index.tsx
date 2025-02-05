@@ -11,6 +11,7 @@ import BankRiskMetrics from '../components/BankRiskMetrics';
 import CommonAnalysis from '../components/CommonAnalysis';
 import MarketingAnalytics from '../components/MarketingAnalytics';
 import RegulatoryCompliance from '../components/RegulatoryCompliance';
+import FraudPrevention from '../components/FraudPrevention';
 
 const getMetricsForBank = (bankId: string) => {
   const metrics = {
@@ -168,6 +169,8 @@ const Index = () => {
             onSentimentUpdate={handleSentimentUpdate}
           />
         </div>
+
+        <FraudPrevention selectedBank={selectedBank} />
 
         <BankRiskMetrics selectedBank={selectedBank} />
 
