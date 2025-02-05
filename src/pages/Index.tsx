@@ -10,6 +10,7 @@ import BankComparison from '../components/BankComparison';
 import BankRiskMetrics from '../components/BankRiskMetrics';
 import CommonAnalysis from '../components/CommonAnalysis';
 import MarketingAnalytics from '../components/MarketingAnalytics';
+import RegulatoryCompliance from '../components/RegulatoryCompliance';
 
 const getMetricsForBank = (bankId: string) => {
   const metrics = {
@@ -169,6 +170,8 @@ const Index = () => {
         </div>
 
         <BankRiskMetrics selectedBank={selectedBank} />
+
+        <RegulatoryCompliance selectedBank={selectedBank} />
 
         <SentimentAnalysis 
           selectedBank={selectedBank}
