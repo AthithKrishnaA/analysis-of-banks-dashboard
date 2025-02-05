@@ -6,6 +6,8 @@ import BankPricePredictions from '../components/predictive/BankPricePredictions'
 import VolumeChart from '../components/predictive/VolumeChart';
 import ConfidenceIntervals from '../components/predictive/ConfidenceIntervals';
 import RiskAssessment from '../components/predictive/RiskAssessment';
+import FraudPredictions from '../components/predictive/FraudPredictions';
+import CompliancePredictions from '../components/predictive/CompliancePredictions';
 import { bankSymbolToName } from '../components/predictive/constants';
 
 const PredictiveAnalysis = () => {
@@ -44,9 +46,12 @@ const PredictiveAnalysis = () => {
         <VolumeChart selectedBank={selectedBank} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ConfidenceIntervals 
-            selectedBank={selectedBank}
-          />
+          <FraudPredictions selectedBank={selectedBank} />
+          <CompliancePredictions selectedBank={selectedBank} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ConfidenceIntervals selectedBank={selectedBank} />
           <RiskAssessment selectedBank={selectedBank} />
         </div>
       </div>
