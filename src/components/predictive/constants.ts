@@ -1,9 +1,9 @@
 export const bankColors = {
-  'HDFC Bank': '#1E40AF',
-  'State Bank of India': '#047857',
-  'ICICI Bank': '#BE123C',
-  'Axis Bank': '#6D28D9',
-  'Kotak Bank': '#EA580C'
+  'HDFC Bank': '#1A1F2C',      // Dark navy blue
+  'State Bank of India': '#403E43',  // Dark charcoal
+  'ICICI Bank': '#2C1A1F',     // Dark burgundy
+  'Axis Bank': '#221F26',      // Dark purple
+  'Kotak Bank': '#262A1F'      // Dark forest green
 };
 
 export const bankSymbolToName: { [key: string]: string } = {
