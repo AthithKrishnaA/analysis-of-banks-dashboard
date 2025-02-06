@@ -12,6 +12,7 @@ import CommonAnalysis from '../components/CommonAnalysis';
 import MarketingAnalytics from '../components/MarketingAnalytics';
 import RegulatoryCompliance from '../components/RegulatoryCompliance';
 import FraudPrevention from '../components/FraudPrevention';
+import ClientMetrics from '../components/wealth/ClientMetrics';
 
 const getMetricsForBank = (bankId: string) => {
   const metrics = {
@@ -192,7 +193,8 @@ const Index = () => {
         <BankComparison selectedBank={selectedBank} />
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
-          <BankMetrics bankData={bankMetricsData[selectedBank]} />
+          <h2 className="text-2xl font-bold text-bank-primary mb-6">Client Analytics</h2>
+          <ClientMetrics selectedBank={selectedBank} />
         </div>
 
         <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">

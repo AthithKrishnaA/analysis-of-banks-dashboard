@@ -3,7 +3,6 @@ import { Loader2, Calendar, TrendingUp } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import BankSelector from '../components/BankSelector';
 import BankPricePredictions from '../components/predictive/BankPricePredictions';
 import VolumeChart from '../components/predictive/VolumeChart';
@@ -11,6 +10,9 @@ import ConfidenceIntervals from '../components/predictive/ConfidenceIntervals';
 import RiskAssessment from '../components/predictive/RiskAssessment';
 import FraudPredictions from '../components/predictive/FraudPredictions';
 import CompliancePredictions from '../components/predictive/CompliancePredictions';
+import PortfolioPerformance from '../components/wealth/PortfolioPerformance';
+import AssetAllocation from '../components/wealth/AssetAllocation';
+import ClientMetrics from '../components/wealth/ClientMetrics';
 
 const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,38 +105,45 @@ const PredictiveAnalysis = () => {
           </div>
         </div>
 
-        <Tabs defaultValue="base" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="base" onClick={() => handleScenarioChange('Base Case')}>Base Case</TabsTrigger>
-            <TabsTrigger value="bull" onClick={() => handleScenarioChange('Bull Case')}>Bull Case</TabsTrigger>
-            <TabsTrigger value="bear" onClick={() => handleScenarioChange('Bear Case')}>Bear Case</TabsTrigger>
+        <Tabs defaultValue="market" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="market">Market Analysis</TabsTrigger>
+            <TabsTrigger value="wealth">Wealth Management</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="base" className="space-y-6">
-            <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="base" />
-            <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
+          <TabsContent value="market" className="space-y-6">
+            <Tabs defaultValue="base" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="base">Base Case</TabsTrigger>
+                <TabsTrigger value="bull">Bull Case</TabsTrigger>
+                <TabsTrigger value="bear">Bear Case</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="base" className="space-y-6">
+                <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="base" />
+                <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
+              </TabsContent>
+
+              <TabsContent value="bull" className="space-y-6">
+                <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="bull" />
+                <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
+              </TabsContent>
+
+              <TabsContent value="bear" className="space-y-6">
+                <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="bear" />
+                <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
-          <TabsContent value="bull" className="space-y-6">
-            <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="bull" />
-            <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
-          </TabsContent>
-
-          <TabsContent value="bear" className="space-y-6">
-            <BankPricePredictions selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} scenario="bear" />
-            <VolumeChart selectedBank={selectedBank} timeframe={predictionDays} />
+          <TabsContent value="wealth" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <PortfolioPerformance selectedBank={selectedBank} timeframe={predictionDays} />
+              <AssetAllocation selectedBank={selectedBank} />
+            </div>
+            <ClientMetrics selectedBank={selectedBank} />
           </TabsContent>
         </Tabs>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FraudPredictions selectedBank={selectedBank} timeframe={predictionDays} />
-          <CompliancePredictions selectedBank={selectedBank} timeframe={predictionDays} />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ConfidenceIntervals selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} />
-          <RiskAssessment selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} />
-        </div>
       </div>
     </div>
   );
