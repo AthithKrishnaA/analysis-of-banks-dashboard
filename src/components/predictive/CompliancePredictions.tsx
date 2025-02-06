@@ -7,15 +7,16 @@ import { bankColors, bankSymbolToName } from './constants';
 
 interface CompliancePredictionsProps {
   selectedBank: string;
+  timeframe?: number;
 }
 
-const CompliancePredictions = ({ selectedBank }: CompliancePredictionsProps) => {
+const CompliancePredictions = ({ selectedBank, timeframe = 30 }: CompliancePredictionsProps) => {
   const generateComplianceMetrics = () => {
     const predictions = [];
     const startDate = new Date();
     const bankName = bankSymbolToName[selectedBank];
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       

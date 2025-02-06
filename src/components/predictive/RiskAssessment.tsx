@@ -6,15 +6,20 @@ import { bankColors, baseValues, volatilityFactors } from './constants';
 
 interface RiskAssessmentProps {
   selectedBank: string;
+  timeframe?: number;
+  volatility?: number;
 }
 
-const RiskAssessment = ({ selectedBank }: RiskAssessmentProps) => {
+const RiskAssessment = ({ 
+  selectedBank, 
+  timeframe = 30,
+  volatility = 1 
+}: RiskAssessmentProps) => {
   const generateRiskMetrics = () => {
     const metrics = [];
     const startDate = new Date();
     
-    // Calculate Value at Risk (VaR) and other risk metrics
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
@@ -23,13 +28,12 @@ const RiskAssessment = ({ selectedBank }: RiskAssessmentProps) => {
       };
 
       Object.entries(baseValues).forEach(([bank, basePrice]) => {
-        const volatility = volatilityFactors[bank];
-        const confidenceLevel = 0.95; // 95% confidence level
-        const timeHorizon = Math.sqrt(10); // 10-day VaR
-        const var95 = basePrice * volatility * timeHorizon * 1.645; // 1.645 is the z-score for 95% confidence
+        const baseVolatility = volatilityFactors[bank] * volatility;
+        const confidenceLevel = 0.95;
+        const timeHorizon = Math.sqrt(10);
+        const var95 = basePrice * baseVolatility * timeHorizon * 1.645;
         
-        // Simulate risk metric that increases with time
-        const riskTrend = 1 + (i / 60); // Gradual increase in risk over time
+        const riskTrend = 1 + (i / 60);
         dataPoint[bank] = Number((var95 * riskTrend * (1 + Math.random() * 0.1 - 0.05)).toFixed(2));
       });
 

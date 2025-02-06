@@ -6,20 +6,20 @@ import { bankColors, baseValues } from './constants';
 
 interface VolumeChartProps {
   selectedBank: string;
+  timeframe?: number;
 }
 
-const VolumeChart = ({ selectedBank }: VolumeChartProps) => {
+const VolumeChart = ({ selectedBank, timeframe = 30 }: VolumeChartProps) => {
   const generateVolumePredictions = () => {
     const predictions = [];
     const startDate = new Date();
     
-    // Base volumes relative to price and market cap
     const baseVolumes = Object.entries(baseValues).reduce((acc, [bank, price]) => ({
       ...acc,
       [bank]: Math.round(price * 1000 * (Math.random() * 0.3 + 0.7))
     }), {} as { [key: string]: number });
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
@@ -28,11 +28,8 @@ const VolumeChart = ({ selectedBank }: VolumeChartProps) => {
       };
 
       Object.entries(baseVolumes).forEach(([bank, baseVolume]) => {
-        // Add weekly pattern (higher volumes mid-week)
         const dayOfWeek = date.getDay();
         const weekPattern = Math.sin((dayOfWeek / 7) * Math.PI) * 0.2 + 1;
-        
-        // Add random variation
         const variation = (Math.random() * 0.4 + 0.8) * weekPattern;
         dataPoint[bank] = Math.round(baseVolume * variation);
       });

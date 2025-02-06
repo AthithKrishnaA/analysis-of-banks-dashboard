@@ -1,21 +1,22 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Shield, AlertTriangle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 import { CustomTooltip } from './CustomTooltip';
 import { bankColors, bankSymbolToName } from './constants';
 
 interface FraudPredictionsProps {
   selectedBank: string;
+  timeframe?: number;
 }
 
-const FraudPredictions = ({ selectedBank }: FraudPredictionsProps) => {
+const FraudPredictions = ({ selectedBank, timeframe = 30 }: FraudPredictionsProps) => {
   const generateFraudMetrics = () => {
     const predictions = [];
     const startDate = new Date();
     const bankName = bankSymbolToName[selectedBank];
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       

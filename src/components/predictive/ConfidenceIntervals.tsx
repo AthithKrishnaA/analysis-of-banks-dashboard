@@ -6,21 +6,27 @@ import { bankColors, bankSymbolToName, baseValues, volatilityFactors } from './c
 
 interface ConfidenceIntervalsProps {
   selectedBank: string;
+  timeframe?: number;
+  volatility?: number;
 }
 
-const ConfidenceIntervals = ({ selectedBank }: ConfidenceIntervalsProps) => {
+const ConfidenceIntervals = ({ 
+  selectedBank, 
+  timeframe = 30,
+  volatility = 1 
+}: ConfidenceIntervalsProps) => {
   const confidenceIntervals = useMemo(() => {
     const bankName = bankSymbolToName[selectedBank];
     const predictions = [];
     const startDate = new Date();
     const baseValue = baseValues[bankName];
-    const volatility = volatilityFactors[bankName];
+    const baseVolatility = volatilityFactors[bankName] * volatility;
     
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
-      const uncertainty = i * volatility * baseValue;
+      const uncertainty = i * baseVolatility * baseValue;
       const predictedValue = baseValue + Math.sin(i / 5) * (baseValue * 0.05) + i * (baseValue * 0.002);
       
       predictions.push({
@@ -32,7 +38,7 @@ const ConfidenceIntervals = ({ selectedBank }: ConfidenceIntervalsProps) => {
     }
     
     return predictions;
-  }, [selectedBank]);
+  }, [selectedBank, timeframe, volatility]);
 
   return (
     <Card>
