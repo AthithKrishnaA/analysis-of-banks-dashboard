@@ -6,18 +6,34 @@ import { bankColors, baseValues, volatilityFactors, growthTrends } from './const
 
 interface BankPricePredictionsProps {
   selectedBank: string;
+  timeframe?: number;
+  volatility?: number;
+  scenario?: 'base' | 'bull' | 'bear';
 }
 
-const BankPricePredictions = ({ selectedBank }: BankPricePredictionsProps) => {
+const BankPricePredictions = ({ 
+  selectedBank, 
+  timeframe = 90, 
+  volatility = 1,
+  scenario = 'base' 
+}: BankPricePredictionsProps) => {
   const generatePredictions = () => {
     const predictions = [];
     const startDate = new Date();
+    
+    // Adjust growth factors based on scenario
+    const scenarioMultiplier = {
+      base: 1,
+      bull: 1.5,
+      bear: 0.5
+    }[scenario];
+
     const dailyGrowthFactors = Object.entries(growthTrends).reduce((acc, [bank, annualRate]) => ({
       ...acc,
-      [bank]: Math.pow(1 + annualRate, 1/365)
+      [bank]: Math.pow(1 + (annualRate * scenarioMultiplier), 1/365)
     }), {} as { [key: string]: number });
 
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < timeframe; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
       
@@ -26,11 +42,12 @@ const BankPricePredictions = ({ selectedBank }: BankPricePredictionsProps) => {
       };
 
       Object.entries(baseValues).forEach(([bank, basePrice]) => {
-        const volatility = volatilityFactors[bank];
+        const baseVolatility = volatilityFactors[bank];
+        const adjustedVolatility = baseVolatility * volatility;
         const growthFactor = dailyGrowthFactors[bank];
         const trend = Math.pow(growthFactor, i);
-        const randomWalk = Math.random() * 2 - 1;
-        const price = basePrice * trend * (1 + volatility * randomWalk);
+        const randomWalk = (Math.random() * 2 - 1) * adjustedVolatility;
+        const price = basePrice * trend * (1 + randomWalk);
         dataPoint[bank] = Number(price.toFixed(2));
       });
 
@@ -45,7 +62,9 @@ const BankPricePredictions = ({ selectedBank }: BankPricePredictionsProps) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>90-Day Price Predictions</CardTitle>
+        <CardTitle>
+          {timeframe}-Day Price Predictions ({scenario.charAt(0).toUpperCase() + scenario.slice(1)} Case)
+        </CardTitle>
       </CardHeader>
       <CardContent className="h-[400px]">
         <ResponsiveContainer width="100%" height="100%">
