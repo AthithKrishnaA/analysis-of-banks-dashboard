@@ -47,7 +47,8 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
         const newPriceChanges = [...priceChanges.slice(-5), priceChange];
         setPriceChanges(newPriceChanges);
 
-        if (Math.abs(priceChange) > 0.1) {
+        // Only show notification if price change is within ±50%
+        if (Math.abs(priceChange) > 0.1 && Math.abs(priceChange) <= 50) {
           const sentiment = analyzeSentiment(newPriceChanges);
           if (onSentimentUpdate) {
             onSentimentUpdate(sentiment, newPriceChanges);
@@ -57,6 +58,8 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
             description: `${sentiment.emoji} ${Math.abs(priceChange).toFixed(2)}% ${priceChange > 0 ? 'increase' : 'decrease'} - ${sentiment.sentiment} sentiment`,
             duration: 3000,
           });
+        } else if (Math.abs(priceChange) > 50) {
+          console.log(`Price change of ${priceChange.toFixed(2)}% exceeded 50% threshold - notification suppressed`);
         }
       }
     } catch (error) {
