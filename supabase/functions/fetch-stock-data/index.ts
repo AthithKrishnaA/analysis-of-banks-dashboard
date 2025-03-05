@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.fresh.run/std@v9.6.1/http/server.ts';
 
 const corsHeaders = {
@@ -15,11 +16,9 @@ serve(async (req) => {
     const { symbol } = await req.json();
     console.log('Fetching data for symbol:', symbol);
 
-    const API_KEY = Deno.env.get('ALPHA_VANTAGE_API_KEY');
-    if (!API_KEY) {
-      throw new Error('Alpha Vantage API key not found');
-    }
-
+    // Use the provided API key directly
+    const API_KEY = '4EJSR2JEK3F455GU';
+    
     const response = await fetch(
       `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${API_KEY}`
     );
