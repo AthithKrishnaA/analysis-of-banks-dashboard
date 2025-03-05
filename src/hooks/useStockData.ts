@@ -34,7 +34,7 @@ const mockNews: Record<string, BankNewsItem[]> = {
   ],
   'HDFCBANK.NS': [
     { title: 'HDFC Bank Expands Rural Presence', summary: 'HDFC Bank opens 500 new branches in rural areas to boost financial inclusion', impact: 'positive', date: new Date().toISOString() },
-    { title: 'HDFC Bank Faces Regulatory Scrutiny', summary: 'RBI examines HDFC Bank's IT infrastructure after recent outages', impact: 'negative', date: new Date().toISOString() }
+    { title: 'HDFC Bank Faces Regulatory Scrutiny', summary: 'RBI examines HDFC Bank\'s IT infrastructure after recent outages', impact: 'negative', date: new Date().toISOString() }
   ],
   'KOTAKBANK.NS': [
     { title: 'Kotak Mahindra Bank Launches New Credit Card', summary: 'New premium credit card offers enhanced rewards for high-value customers', impact: 'positive', date: new Date().toISOString() },
