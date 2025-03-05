@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
@@ -96,7 +95,6 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     const basePrice = baseValues[selectedBank];
     const newPrice = basePrice * multiplier;
     
-    // Update the last data point with the new price
     setData(prevData => {
       const newData = [...prevData];
       if (newData.length > 0) {
@@ -119,17 +117,14 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       console.log('Generating mock data for:', selectedBank);
       const basePrice = baseValues[selectedBank];
       
-      // Generate new price point
       const newPrice = generateMockPrice(basePrice);
       const timestamp = new Date().toLocaleTimeString();
 
-      // Update data points
       setData(prevData => {
         const newData = [...prevData, { date: timestamp, price: newPrice }];
-        return newData.slice(-6); // Keep last 6 points
+        return newData.slice(-6);
       });
 
-      // Calculate price change
       if (data.length >= 2) {
         const priceChange = ((newPrice - data[data.length - 1].price) / data[data.length - 1].price) * 100;
         const newPriceChanges = [...priceChanges.slice(-5), priceChange];
@@ -164,14 +159,12 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       setPriceChanges([]);
       setNews(mockNews[selectedBank] || []);
       
-      // Initial data point
       const basePrice = baseValues[selectedBank];
       setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
       
-      // Set up interval for mock data updates
       const interval = setInterval(() => {
         generateMockData();
-      }, interactiveMode ? 5000 : 15000); // Update faster in interactive mode
+      }, interactiveMode ? 5000 : 15000);
       
       return () => clearInterval(interval);
     }
