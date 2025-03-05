@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Loader2, Calendar, TrendingUp } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
@@ -13,6 +14,8 @@ import CompliancePredictions from '../components/predictive/CompliancePrediction
 import PortfolioPerformance from '../components/wealth/PortfolioPerformance';
 import AssetAllocation from '../components/wealth/AssetAllocation';
 import ClientMetrics from '../components/wealth/ClientMetrics';
+import { useStockData } from '../hooks/useStockData';
+import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
 
 const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +24,7 @@ const PredictiveAnalysis = () => {
   const [volatilityFactor, setVolatilityFactor] = useState(1);
   const [selectedScenario, setSelectedScenario] = useState('base');
   const { toast } = useToast();
+  const { toggleInteractiveMode, simulateMarketEvent, news, interactiveMode } = useStockData(selectedBank);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -104,6 +108,14 @@ const PredictiveAnalysis = () => {
             </div>
           </div>
         </div>
+
+        <InteractiveBankFeatures 
+          selectedBank={selectedBank} 
+          toggleInteractiveMode={toggleInteractiveMode}
+          simulateMarketEvent={simulateMarketEvent}
+          interactiveMode={interactiveMode}
+          news={news}
+        />
 
         <Tabs defaultValue="market" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
