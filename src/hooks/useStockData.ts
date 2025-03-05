@@ -19,6 +19,7 @@ const baseValues = {
 export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
+  const [useMockData, setUseMockData] = useState(false);
   const { toast } = useToast();
 
   const generateMockPrice = (basePrice: number) => {
@@ -31,32 +32,51 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     try {
       console.log('Fetching real data for:', selectedBank);
       
+      // Transform the symbol to standard format if needed (remove .NS for some APIs)
+      const apiSymbol = selectedBank;
+      
       // Try to use the Supabase edge function
-      const response = await fetch('https://22b53b1c-ee83-4b61-8f3c-c2b9ec5adcac.supabase.co/functions/v1/fetch-stock-data', {
+      const response = await fetch('https://dlpamlngvsugbqopciqq.supabase.co/functions/v1/fetch-stock-data', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ symbol: selectedBank }),
+        body: JSON.stringify({ symbol: apiSymbol }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to fetch from API');
+        const errorText = await response.text();
+        console.error('API response error:', errorText);
+        throw new Error(`Failed to fetch from API: ${response.status}`);
       }
       
       const apiData = await response.json();
       console.log('API data received:', apiData);
       
+      // Check if the API returned an error
+      if (apiData.error) {
+        console.error('API returned an error:', apiData.error);
+        throw new Error(apiData.error);
+      }
+      
       // Fall back to mock data if the API doesn't return expected format
       if (!apiData['Time Series (5min)']) {
         console.log('API returned unexpected format, using mock data');
-        fetchMockData();
+        setUseMockData(true);
         return;
       }
       
       // Process the real data
       const timeSeries = apiData['Time Series (5min)'];
-      const newDataPoints = Object.entries(timeSeries)
+      const timeSeriesEntries = Object.entries(timeSeries);
+      
+      if (timeSeriesEntries.length === 0) {
+        console.log('No time series data available, using mock data');
+        setUseMockData(true);
+        return;
+      }
+      
+      const newDataPoints = timeSeriesEntries
         .slice(0, 6)
         .map(([timestamp, values]: [string, any]) => ({
           date: new Date(timestamp).toLocaleTimeString(),
@@ -64,7 +84,14 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
         }))
         .reverse();
       
+      if (newDataPoints.length === 0) {
+        console.log('No data points extracted, using mock data');
+        setUseMockData(true);
+        return;
+      }
+      
       setData(newDataPoints);
+      setUseMockData(false);
       
       // Calculate price changes if we have enough data points
       if (newDataPoints.length >= 2) {
@@ -92,7 +119,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     } catch (error) {
       console.error('Error fetching real data:', error);
       console.log('Falling back to mock data');
-      fetchMockData();
+      setUseMockData(true);
     }
   };
 
@@ -149,6 +176,8 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     if (selectedBank) {
       setData([]);
       setPriceChanges([]);
+      setUseMockData(false);
+      
       // Initial data point
       const basePrice = baseValues[selectedBank];
       setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
@@ -158,13 +187,20 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       
       // Set up interval for live updates
       const interval = setInterval(() => {
-        // Try real data first, fallback to mock
-        fetchRealData().catch(() => fetchMockData());
+        if (useMockData) {
+          fetchMockData();
+        } else {
+          // Try real data again
+          fetchRealData().catch(() => {
+            setUseMockData(true);
+            fetchMockData();
+          });
+        }
       }, 30000); // Every 30 seconds
       
       return () => clearInterval(interval);
     }
-  }, [selectedBank]);
+  }, [selectedBank, useMockData]);
 
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
