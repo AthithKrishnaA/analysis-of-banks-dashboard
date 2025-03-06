@@ -25,7 +25,7 @@ const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) =>
   
   // Bank official website URLs
   const bankWebsites: Record<string, string> = {
-    'SBIN.NS': 'https://www.onlinesbi.sbi',
+    'SBIN.NS': 'https://www.onlinesbi.sbi/',
     'AXISBANK.NS': 'https://www.axisbank.com',
     'HDFCBANK.NS': 'https://www.hdfcbank.com',
     'KOTAKBANK.NS': 'https://www.kotak.com',
