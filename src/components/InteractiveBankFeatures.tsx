@@ -6,6 +6,7 @@ import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard } from 'lucide
 import { useToast } from "@/hooks/use-toast";
 import LoanCalculator from './LoanCalculator';
 import CreditCardOptions from './CreditCardOptions';
+import RateAlertForm from './RateAlertForm';
 
 interface InteractiveBankFeaturesProps {
   selectedBank: string;
@@ -30,17 +31,14 @@ const InteractiveBankFeatures = ({
   const { toast } = useToast();
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showCreditCardOptions, setShowCreditCardOptions] = useState(false);
+  const [showRateAlertForm, setShowRateAlertForm] = useState(false);
 
   const handleCreditCardApplication = () => {
     setShowCreditCardOptions(true);
   };
 
   const handleInterestRateAlert = () => {
-    toast({
-      title: "Interest Rate Alert Set",
-      description: "You'll be notified when interest rates change",
-      duration: 3000,
-    });
+    setShowRateAlertForm(true);
   };
 
   return (
@@ -62,6 +60,17 @@ const InteractiveBankFeatures = ({
             <CreditCardOptions
               selectedBank={selectedBank}
               onClose={() => setShowCreditCardOptions(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {showRateAlertForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <RateAlertForm
+              selectedBank={selectedBank}
+              onClose={() => setShowRateAlertForm(false)}
             />
           </div>
         </div>

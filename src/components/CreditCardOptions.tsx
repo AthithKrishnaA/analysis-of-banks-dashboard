@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, ShieldCheck, Zap, Globe, BadgePercent } from 'lucide-react';
+import { CreditCard, ShieldCheck, Zap, Globe, BadgePercent, ExternalLink } from 'lucide-react';
 
 interface CreditCardOptionsProps {
   selectedBank: string;
@@ -23,6 +23,15 @@ interface CreditCardType {
 const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) => {
   const { toast } = useToast();
   
+  // Bank URL mapping
+  const bankUrls: Record<string, string> = {
+    'SBIN.NS': 'https://www.onlinesbi.sbi/cards/',
+    'AXISBANK.NS': 'https://www.axisbank.com/retail/cards/credit-card',
+    'HDFCBANK.NS': 'https://www.hdfcbank.com/personal/pay/cards/credit-cards',
+    'KOTAKBANK.NS': 'https://www.kotak.com/en/personal-banking/cards/credit-cards.html',
+    'ICICIBANK.NS': 'https://www.icicibank.com/personal-banking/cards/credit-cards'
+  };
+
   // Bank-specific credit card options
   const bankCreditCards: Record<string, CreditCardType[]> = {
     'SBIN.NS': [
@@ -159,10 +168,24 @@ const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) =>
   const handleApply = (cardId: string) => {
     const card = availableCreditCards.find(card => card.id === cardId);
     if (card) {
+      const bankUrl = bankUrls[selectedBank] || '#';
+      
       toast({
-        title: "Application Submitted",
-        description: `Your application for ${card.name} has been received. We'll contact you shortly.`,
-        duration: 5000,
+        title: "Application Initiated",
+        description: (
+          <div className="flex flex-col gap-2">
+            <span>Your application for {card.name} is ready to proceed.</span>
+            <a 
+              href={bankUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline"
+            >
+              Visit {selectedBank.replace('.NS', '')} website <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+        ),
+        duration: 8000,
       });
       onClose();
     }
@@ -243,9 +266,10 @@ const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) =>
               <CardFooter>
                 <Button 
                   onClick={() => handleApply(card.id)} 
-                  className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800"
+                  className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 flex items-center justify-center gap-2"
                 >
                   Apply Now
+                  <ExternalLink className="h-4 w-4 ml-1" />
                 </Button>
               </CardFooter>
             </Card>
