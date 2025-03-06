@@ -23,13 +23,13 @@ interface CreditCardType {
 const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) => {
   const { toast } = useToast();
   
-  // Bank URL mapping
-  const bankUrls: Record<string, string> = {
-    'SBIN.NS': 'https://www.onlinesbi.sbi/cards/',
-    'AXISBANK.NS': 'https://www.axisbank.com/retail/cards/credit-card',
-    'HDFCBANK.NS': 'https://www.hdfcbank.com/personal/pay/cards/credit-cards',
-    'KOTAKBANK.NS': 'https://www.kotak.com/en/personal-banking/cards/credit-cards.html',
-    'ICICIBANK.NS': 'https://www.icicibank.com/personal-banking/cards/credit-cards'
+  // Bank official website URLs
+  const bankWebsites: Record<string, string> = {
+    'SBIN.NS': 'https://www.onlinesbi.com',
+    'AXISBANK.NS': 'https://www.axisbank.com',
+    'HDFCBANK.NS': 'https://www.hdfcbank.com',
+    'KOTAKBANK.NS': 'https://www.kotak.com',
+    'ICICIBANK.NS': 'https://www.icicibank.com'
   };
 
   // Bank-specific credit card options
@@ -168,7 +168,7 @@ const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) =>
   const handleApply = (cardId: string) => {
     const card = availableCreditCards.find(card => card.id === cardId);
     if (card) {
-      const bankUrl = bankUrls[selectedBank] || '#';
+      const bankWebsite = bankWebsites[selectedBank] || '#';
       
       toast({
         title: "Application Initiated",
@@ -176,12 +176,12 @@ const CreditCardOptions = ({ selectedBank, onClose }: CreditCardOptionsProps) =>
           <div className="flex flex-col gap-2">
             <span>Your application for {card.name} is ready to proceed.</span>
             <a 
-              href={bankUrl} 
+              href={bankWebsite} 
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-blue-600 hover:underline"
             >
-              Visit {selectedBank.replace('.NS', '')} website <ExternalLink className="h-3 w-3" />
+              Visit {selectedBank.replace('.NS', '')} official website <ExternalLink className="h-3 w-3" />
             </a>
           </div>
         ),
