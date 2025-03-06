@@ -5,6 +5,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import LoanCalculator from './LoanCalculator';
+import CreditCardOptions from './CreditCardOptions';
 
 interface InteractiveBankFeaturesProps {
   selectedBank: string;
@@ -28,13 +29,10 @@ const InteractiveBankFeatures = ({
 }: InteractiveBankFeaturesProps) => {
   const { toast } = useToast();
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
+  const [showCreditCardOptions, setShowCreditCardOptions] = useState(false);
 
   const handleCreditCardApplication = () => {
-    toast({
-      title: "Credit Card Application",
-      description: `Explore premium credit card options with ${selectedBank}`,
-      duration: 3000,
-    });
+    setShowCreditCardOptions(true);
   };
 
   const handleInterestRateAlert = () => {
@@ -53,6 +51,17 @@ const InteractiveBankFeatures = ({
             <LoanCalculator 
               selectedBank={selectedBank} 
               onClose={() => setShowLoanCalculator(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {showCreditCardOptions && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <CreditCardOptions
+              selectedBank={selectedBank}
+              onClose={() => setShowCreditCardOptions(false)}
             />
           </div>
         </div>
