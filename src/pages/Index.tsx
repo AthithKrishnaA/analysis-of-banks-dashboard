@@ -13,6 +13,13 @@ import MarketingAnalytics from '../components/MarketingAnalytics';
 import RegulatoryCompliance from '../components/RegulatoryCompliance';
 import FraudPrevention from '../components/FraudPrevention';
 import ClientMetrics from '../components/wealth/ClientMetrics';
+import BranchNetwork from '../components/BranchNetwork';
+import CustomerSatisfaction from '../components/CustomerSatisfaction';
+import DigitalBankingMetrics from '../components/DigitalBankingMetrics';
+import PortfolioRecommendations from '../components/wealth/PortfolioRecommendations';
+import { useStockData } from '@/hooks/useStockData';
+import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const getMetricsForBank = (bankId: string) => {
   const metrics = {
@@ -126,6 +133,7 @@ const Index = () => {
     color: 'text-gray-500' 
   });
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
+  const [activeTab, setActiveTab] = useState("overview");
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -138,6 +146,13 @@ const Index = () => {
   };
 
   const metrics = getMetricsForBank(selectedBank);
+  const { 
+    data, 
+    toggleInteractiveMode, 
+    simulateMarketEvent, 
+    news,
+    interactiveMode 
+  } = useStockData(selectedBank, handleSentimentUpdate);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
@@ -171,44 +186,80 @@ const Index = () => {
           />
         </div>
 
-        <FraudPrevention selectedBank={selectedBank} />
-
-        <BankRiskMetrics selectedBank={selectedBank} />
-
-        <RegulatoryCompliance selectedBank={selectedBank} />
-
-        <SentimentAnalysis 
+        <InteractiveBankFeatures 
           selectedBank={selectedBank}
-          sentiment={sentiment}
-          priceChanges={priceChanges}
+          toggleInteractiveMode={toggleInteractiveMode}
+          simulateMarketEvent={simulateMarketEvent}
+          interactiveMode={interactiveMode}
+          news={news}
         />
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <MetricsCard label="P/E Ratio" value="12.45" />
-          <MetricsCard label="Dividend Yield" value="2.80%" />
-          <MetricsCard label="52 Week High" value="₹629.35" />
-          <MetricsCard label="52 Week Low" value="₹501.85" />
-        </div>
 
-        <BankComparison selectedBank={selectedBank} />
-
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-bank-primary mb-6">Client Analytics</h2>
-          <ClientMetrics selectedBank={selectedBank} />
-        </div>
-
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-bank-primary mb-6">Common Analysis</h2>
-          <CommonAnalysis selectedBank={selectedBank} />
-        </div>
-
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-bank-primary mb-6">Marketing Analytics</h2>
-          <MarketingAnalytics selectedBank={selectedBank} />
-        </div>
+        <Tabs defaultValue="overview" className="w-full" onValueChange={(value) => setActiveTab(value)}>
+          <TabsList className="grid grid-cols-4 mb-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="digital">Digital</TabsTrigger>
+            <TabsTrigger value="customers">Customers</TabsTrigger>
+            <TabsTrigger value="risk">Risk & Compliance</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <BranchNetwork selectedBank={selectedBank} />
+              <ClientMetrics selectedBank={selectedBank} />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <BankComparison selectedBank={selectedBank} />
+              </div>
+              <div>
+                <PortfolioRecommendations selectedBank={selectedBank} />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <MetricsCard label="P/E Ratio" value="12.45" />
+              <MetricsCard label="Dividend Yield" value="2.80%" />
+              <MetricsCard label="52 Week High" value="₹629.35" />
+              <MetricsCard label="52 Week Low" value="₹501.85" />
+            </div>
+            
+            <SentimentAnalysis 
+              selectedBank={selectedBank}
+              sentiment={sentiment}
+              priceChanges={priceChanges}
+            />
+          </TabsContent>
+          
+          <TabsContent value="digital" className="space-y-6">
+            <DigitalBankingMetrics selectedBank={selectedBank} />
+            <MarketingAnalytics selectedBank={selectedBank} />
+            <CommonAnalysis selectedBank={selectedBank} />
+          </TabsContent>
+          
+          <TabsContent value="customers" className="space-y-6">
+            <CustomerSatisfaction selectedBank={selectedBank} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <BankMetrics selectedBank={selectedBank} />
+              <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6">
+                <h2 className="text-2xl font-bold text-bank-primary mb-6">Common Analysis</h2>
+                <CommonAnalysis selectedBank={selectedBank} />
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="risk" className="space-y-6">
+            <BankRiskMetrics selectedBank={selectedBank} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FraudPrevention selectedBank={selectedBank} />
+              <RegulatoryCompliance selectedBank={selectedBank} />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
 };
 
 export default Index;
+
