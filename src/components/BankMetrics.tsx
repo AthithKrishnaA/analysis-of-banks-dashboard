@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { ChartPie } from 'lucide-react';
 
 interface BankMetricsProps {
-  bankData: {
+  bankData?: {
     loanData: Array<{ name: string; value: number }>;
     branchData: {
       rural: number;
@@ -12,6 +13,7 @@ interface BankMetricsProps {
       semiUrban: number;
     };
   };
+  selectedBank?: string;
 }
 
 const COLORS = ['#9b87f5', '#7E69AB', '#6E59A5', '#F2FCE2', '#FEF7CD', '#FEC6A1'];
@@ -49,6 +51,34 @@ const LOAN_DISTRIBUTION = {
   ],
 };
 
+const BRANCH_DISTRIBUTION = {
+  'SBIN.NS': {
+    rural: 8500,
+    urban: 6200,
+    semiUrban: 7300,
+  },
+  'AXISBANK.NS': {
+    rural: 4200,
+    urban: 5100,
+    semiUrban: 4700,
+  },
+  'HDFCBANK.NS': {
+    rural: 5200,
+    urban: 6800,
+    semiUrban: 5500,
+  },
+  'KOTAKBANK.NS': {
+    rural: 3200,
+    urban: 4500,
+    semiUrban: 3800,
+  },
+  'ICICIBANK.NS': {
+    rural: 5800,
+    urban: 5900,
+    semiUrban: 5200,
+  },
+};
+
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -60,11 +90,15 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const BankMetrics = ({ bankData }: BankMetricsProps) => {
+const BankMetrics = ({ bankData, selectedBank = 'SBIN.NS' }: BankMetricsProps) => {
+  // Use provided bankData or get data based on selectedBank
+  const loanData = bankData?.loanData || LOAN_DISTRIBUTION[selectedBank];
+  const branchData = bankData?.branchData || BRANCH_DISTRIBUTION[selectedBank];
+  
   const branchDistribution = [
-    { name: 'Rural', value: bankData.branchData.rural },
-    { name: 'Urban', value: bankData.branchData.urban },
-    { name: 'Semi-Urban', value: bankData.branchData.semiUrban },
+    { name: 'Rural', value: branchData.rural },
+    { name: 'Urban', value: branchData.urban },
+    { name: 'Semi-Urban', value: branchData.semiUrban },
   ];
 
   return (
@@ -78,7 +112,7 @@ const BankMetrics = ({ bankData }: BankMetricsProps) => {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={bankData.loanData}
+                data={loanData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -87,7 +121,7 @@ const BankMetrics = ({ bankData }: BankMetricsProps) => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {bankData.loanData.map((entry, index) => (
+                {loanData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
                     fill={COLORS[index % COLORS.length]}
