@@ -2,17 +2,19 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard } from 'lucide-react';
+import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard, Calendar } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import LoanCalculator from './LoanCalculator';
 import CreditCardOptions from './CreditCardOptions';
 import RateAlertForm from './RateAlertForm';
+import MarketCalendar from './MarketCalendar';
 
 interface InteractiveBankFeaturesProps {
   selectedBank: string;
   toggleInteractiveMode: () => boolean;
   simulateMarketEvent: () => { price: number; description: string };
   interactiveMode: boolean;
+  isMarketOpen?: boolean;
   news: Array<{
     title: string;
     summary: string;
@@ -26,12 +28,14 @@ const InteractiveBankFeatures = ({
   toggleInteractiveMode, 
   simulateMarketEvent, 
   interactiveMode,
+  isMarketOpen = true,
   news
 }: InteractiveBankFeaturesProps) => {
   const { toast } = useToast();
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showCreditCardOptions, setShowCreditCardOptions] = useState(false);
   const [showRateAlertForm, setShowRateAlertForm] = useState(false);
+  const [showMarketCalendar, setShowMarketCalendar] = useState(false);
 
   const handleCreditCardApplication = () => {
     setShowCreditCardOptions(true);
@@ -76,6 +80,16 @@ const InteractiveBankFeatures = ({
         </div>
       )}
 
+      {showMarketCalendar && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <MarketCalendar
+              onClose={() => setShowMarketCalendar(false)}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -103,7 +117,12 @@ const InteractiveBankFeatures = ({
                 
                 <button
                   onClick={simulateMarketEvent}
-                  className="p-3 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 flex items-center justify-center gap-2 transition-colors"
+                  className={`p-3 rounded-lg flex items-center justify-center gap-2 transition-colors ${
+                    isMarketOpen
+                      ? "bg-amber-100 hover:bg-amber-200 text-amber-900"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}
+                  disabled={!isMarketOpen}
                 >
                   <Percent className="h-4 w-4" />
                   <span className="text-sm font-medium">Simulate Event</span>
@@ -133,6 +152,14 @@ const InteractiveBankFeatures = ({
                 >
                   <Bell className="h-4 w-4" />
                   <span className="text-sm font-medium">Set Rate Alert</span>
+                </button>
+                
+                <button
+                  onClick={() => setShowMarketCalendar(true)}
+                  className="p-3 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-900 flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  <span className="text-sm font-medium">Market Calendar</span>
                 </button>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
+import { format, parse, getDay, isWithinInterval, isWeekend } from 'date-fns';
 
 interface StockDataPoint {
   date: string;
@@ -13,6 +14,29 @@ interface BankNewsItem {
   impact: 'positive' | 'negative' | 'neutral';
   date: string;
 }
+
+// Indian stock market hours: 9:15 AM to 3:30 PM
+const MARKET_OPEN_TIME = '09:15:00';
+const MARKET_CLOSE_TIME = '15:30:00';
+
+// Indian holidays in 2024 (partial list)
+const INDIAN_MARKET_HOLIDAYS_2024 = [
+  new Date(2024, 0, 26),  // Republic Day
+  new Date(2024, 2, 8),   // Holi
+  new Date(2024, 2, 29),  // Good Friday
+  new Date(2024, 3, 11),  // Eid-ul-Fitr
+  new Date(2024, 3, 17),  // Ram Navami
+  new Date(2024, 4, 1),   // Maharashtra Day
+  new Date(2024, 4, 20),  // Lok Sabha Elections
+  new Date(2024, 5, 17),  // Bakri Eid
+  new Date(2024, 6, 17),  // Muharram
+  new Date(2024, 7, 15),  // Independence Day
+  new Date(2024, 7, 26),  // Ganesh Chaturthi
+  new Date(2024, 9, 2),   // Gandhi Jayanti
+  new Date(2024, 9, 31),  // Diwali-Laxmi Puja
+  new Date(2024, 10, 15), // Guru Nanak Jayanti
+  new Date(2024, 11, 25)  // Christmas
+];
 
 const baseValues = {
   'SBIN.NS': 778.10,
@@ -50,7 +74,41 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const [news, setNews] = useState<BankNewsItem[]>([]);
   const [interactiveMode, setInteractiveMode] = useState(false);
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
   const { toast } = useToast();
+
+  const checkMarketStatus = () => {
+    const now = new Date();
+    const currentDay = getDay(now);
+    
+    if (isWeekend(now)) {
+      setIsMarketOpen(false);
+      return false;
+    }
+    
+    const isHoliday = INDIAN_MARKET_HOLIDAYS_2024.some(holiday => 
+      holiday.getDate() === now.getDate() && 
+      holiday.getMonth() === now.getMonth() && 
+      holiday.getFullYear() === now.getFullYear()
+    );
+    
+    if (isHoliday) {
+      setIsMarketOpen(false);
+      return false;
+    }
+    
+    const currentTimeStr = format(now, 'HH:mm:ss');
+    const openTime = parse(MARKET_OPEN_TIME, 'HH:mm:ss', new Date());
+    const closeTime = parse(MARKET_CLOSE_TIME, 'HH:mm:ss', new Date());
+    
+    const isWithinTradingHours = isWithinInterval(
+      parse(currentTimeStr, 'HH:mm:ss', new Date()),
+      { start: openTime, end: closeTime }
+    );
+    
+    setIsMarketOpen(isWithinTradingHours);
+    return isWithinTradingHours;
+  };
 
   const generateMockPrice = (basePrice: number) => {
     const volatility = 0.002; // 0.2% volatility
@@ -71,6 +129,15 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   };
 
   const simulateMarketEvent = () => {
+    if (!isMarketOpen) {
+      toast({
+        title: "Market Closed",
+        description: "Cannot simulate market events when the market is closed.",
+        duration: 3000,
+      });
+      return { price: baseValues[selectedBank], description: "Market is closed" };
+    }
+    
     const eventTypes = ['positive', 'negative', 'neutral'];
     const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
     
@@ -114,6 +181,11 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
 
   const generateMockData = () => {
     try {
+      if (!checkMarketStatus()) {
+        console.log('Market is closed. Not generating new data.');
+        return;
+      }
+      
       console.log('Generating mock data for:', selectedBank);
       const basePrice = baseValues[selectedBank];
       
@@ -154,6 +226,20 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   };
 
   useEffect(() => {
+    const initialMarketStatus = checkMarketStatus();
+    
+    if (!initialMarketStatus) {
+      toast({
+        title: "Market Status",
+        description: "The stock market is currently closed. Data will not update until market hours.",
+        duration: 5000,
+      });
+    }
+    
+    const marketStatusInterval = setInterval(() => {
+      checkMarketStatus();
+    }, 60000);
+    
     if (selectedBank) {
       setData([]);
       setPriceChanges([]);
@@ -162,13 +248,30 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       const basePrice = baseValues[selectedBank];
       setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
       
+      let dataInterval: NodeJS.Timeout | null = null;
+      
+      if (initialMarketStatus) {
+        dataInterval = setInterval(() => {
+          generateMockData();
+        }, interactiveMode ? 5000 : 15000);
+      }
+      
+      return () => {
+        if (dataInterval) clearInterval(dataInterval);
+        clearInterval(marketStatusInterval);
+      };
+    }
+  }, [selectedBank, interactiveMode]);
+  
+  useEffect(() => {
+    if (isMarketOpen && selectedBank) {
       const interval = setInterval(() => {
         generateMockData();
       }, interactiveMode ? 5000 : 15000);
       
       return () => clearInterval(interval);
     }
-  }, [selectedBank, interactiveMode]);
+  }, [isMarketOpen, selectedBank, interactiveMode]);
 
   const priceChange = data.length >= 2 
     ? ((data[data.length - 1].price - data[data.length - 2].price) / data[data.length - 2].price) * 100 
@@ -183,6 +286,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     news, 
     toggleInteractiveMode, 
     simulateMarketEvent,
-    interactiveMode 
+    interactiveMode,
+    isMarketOpen
   };
 };

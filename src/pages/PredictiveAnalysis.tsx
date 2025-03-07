@@ -24,7 +24,7 @@ const PredictiveAnalysis = () => {
   const [volatilityFactor, setVolatilityFactor] = useState(1);
   const [selectedScenario, setSelectedScenario] = useState('base');
   const { toast } = useToast();
-  const { toggleInteractiveMode, simulateMarketEvent, news, interactiveMode } = useStockData(selectedBank);
+  const { toggleInteractiveMode, simulateMarketEvent, news, interactiveMode, isMarketOpen } = useStockData(selectedBank);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -114,6 +114,7 @@ const PredictiveAnalysis = () => {
           toggleInteractiveMode={toggleInteractiveMode}
           simulateMarketEvent={simulateMarketEvent}
           interactiveMode={interactiveMode}
+          isMarketOpen={isMarketOpen}
           news={news}
         />
 
