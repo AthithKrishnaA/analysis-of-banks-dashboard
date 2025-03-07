@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
     });
 
+    // Handle OAuth redirects
+    const handleHashChange = async () => {
+      // This helps with processing the OAuth redirect
+      const { data, error } = await supabase.auth.getSession();
+      if (data.session) {
+        setSession(data.session);
+        toast({
+          title: "Successfully signed in",
+        });
+      } else if (error) {
+        toast({
+          title: "Authentication error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    };
+
+    // Call once on mount
+    handleHashChange();
+
     // Listen for auth changes
     const {
       data: { subscription },
@@ -33,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [toast]);
 
   const signOut = async () => {
     try {
