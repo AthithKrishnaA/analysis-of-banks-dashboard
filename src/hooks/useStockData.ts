@@ -19,23 +19,21 @@ interface BankNewsItem {
 const MARKET_OPEN_TIME = '09:15:00';
 const MARKET_CLOSE_TIME = '15:30:00';
 
-// Indian holidays in 2024 (partial list)
-const INDIAN_MARKET_HOLIDAYS_2024 = [
-  new Date(2024, 0, 26),  // Republic Day
-  new Date(2024, 2, 8),   // Holi
-  new Date(2024, 2, 29),  // Good Friday
-  new Date(2024, 3, 11),  // Eid-ul-Fitr
-  new Date(2024, 3, 17),  // Ram Navami
-  new Date(2024, 4, 1),   // Maharashtra Day
-  new Date(2024, 4, 20),  // Lok Sabha Elections
-  new Date(2024, 5, 17),  // Bakri Eid
-  new Date(2024, 6, 17),  // Muharram
-  new Date(2024, 7, 15),  // Independence Day
-  new Date(2024, 7, 26),  // Ganesh Chaturthi
-  new Date(2024, 9, 2),   // Gandhi Jayanti
-  new Date(2024, 9, 31),  // Diwali-Laxmi Puja
-  new Date(2024, 10, 15), // Guru Nanak Jayanti
-  new Date(2024, 11, 25)  // Christmas
+// Indian holidays in 2025
+const INDIAN_MARKET_HOLIDAYS_2025 = [
+  new Date(2025, 0, 1),   // New Year's Day
+  new Date(2025, 0, 26),  // Republic Day
+  new Date(2025, 2, 28),  // Holi
+  new Date(2025, 3, 18),  // Good Friday
+  new Date(2025, 3, 1),   // Eid-ul-Fitr
+  new Date(2025, 4, 1),   // Maharashtra Day
+  new Date(2025, 5, 8),   // Bakri Eid
+  new Date(2025, 7, 15),  // Independence Day
+  new Date(2025, 8, 15),  // Ganesh Chaturthi
+  new Date(2025, 9, 2),   // Gandhi Jayanti
+  new Date(2025, 9, 21),  // Diwali-Laxmi Puja
+  new Date(2025, 10, 3),  // Guru Nanak Jayanti
+  new Date(2025, 11, 25)  // Christmas
 ];
 
 const baseValues = {
@@ -86,7 +84,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       return false;
     }
     
-    const isHoliday = INDIAN_MARKET_HOLIDAYS_2024.some(holiday => 
+    const isHoliday = INDIAN_MARKET_HOLIDAYS_2025.some(holiday => 
       holiday.getDate() === now.getDate() && 
       holiday.getMonth() === now.getMonth() && 
       holiday.getFullYear() === now.getFullYear()

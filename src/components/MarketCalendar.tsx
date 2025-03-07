@@ -6,42 +6,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, isWeekend } from 'date-fns';
 import { Clock, X, Calendar as CalendarIcon, AlertTriangle } from 'lucide-react';
 
-// Indian market holidays in 2024
-const INDIAN_MARKET_HOLIDAYS_2024 = [
-  new Date(2024, 0, 26),  // Republic Day
-  new Date(2024, 2, 8),   // Holi
-  new Date(2024, 2, 29),  // Good Friday
-  new Date(2024, 3, 11),  // Eid-ul-Fitr
-  new Date(2024, 3, 17),  // Ram Navami
-  new Date(2024, 4, 1),   // Maharashtra Day
-  new Date(2024, 4, 20),  // Lok Sabha Elections
-  new Date(2024, 5, 17),  // Bakri Eid
-  new Date(2024, 6, 17),  // Muharram
-  new Date(2024, 7, 15),  // Independence Day
-  new Date(2024, 7, 26),  // Ganesh Chaturthi
-  new Date(2024, 9, 2),   // Gandhi Jayanti
-  new Date(2024, 9, 31),  // Diwali-Laxmi Puja
-  new Date(2024, 10, 15), // Guru Nanak Jayanti
-  new Date(2024, 11, 25)  // Christmas
+// Indian market holidays in 2025
+const INDIAN_MARKET_HOLIDAYS_2025 = [
+  new Date(2025, 0, 1),   // New Year's Day
+  new Date(2025, 0, 26),  // Republic Day
+  new Date(2025, 2, 28),  // Holi
+  new Date(2025, 3, 18),  // Good Friday
+  new Date(2025, 3, 1),   // Eid-ul-Fitr
+  new Date(2025, 4, 1),   // Maharashtra Day
+  new Date(2025, 5, 8),   // Bakri Eid
+  new Date(2025, 7, 15),  // Independence Day
+  new Date(2025, 8, 15),  // Ganesh Chaturthi
+  new Date(2025, 9, 2),   // Gandhi Jayanti
+  new Date(2025, 9, 21),  // Diwali-Laxmi Puja
+  new Date(2025, 10, 3),  // Guru Nanak Jayanti
+  new Date(2025, 11, 25)  // Christmas
 ];
 
 // Holiday descriptions
 const HOLIDAY_DESCRIPTIONS: Record<string, string> = {
-  '2024-01-26': 'Republic Day',
-  '2024-03-08': 'Holi',
-  '2024-03-29': 'Good Friday',
-  '2024-04-11': 'Eid-ul-Fitr',
-  '2024-04-17': 'Ram Navami',
-  '2024-05-01': 'Maharashtra Day',
-  '2024-05-20': 'Lok Sabha Elections',
-  '2024-06-17': 'Bakri Eid',
-  '2024-07-17': 'Muharram',
-  '2024-08-15': 'Independence Day',
-  '2024-08-26': 'Ganesh Chaturthi',
-  '2024-10-02': 'Gandhi Jayanti',
-  '2024-10-31': 'Diwali-Laxmi Puja',
-  '2024-11-15': 'Guru Nanak Jayanti',
-  '2024-12-25': 'Christmas'
+  '2025-01-01': 'New Year\'s Day',
+  '2025-01-26': 'Republic Day',
+  '2025-03-28': 'Holi',
+  '2025-04-18': 'Good Friday',
+  '2025-04-01': 'Eid-ul-Fitr',
+  '2025-05-01': 'Maharashtra Day',
+  '2025-06-08': 'Bakri Eid',
+  '2025-08-15': 'Independence Day',
+  '2025-09-15': 'Ganesh Chaturthi',
+  '2025-10-02': 'Gandhi Jayanti',
+  '2025-10-21': 'Diwali-Laxmi Puja',
+  '2025-11-03': 'Guru Nanak Jayanti',
+  '2025-12-25': 'Christmas'
 };
 
 interface MarketCalendarProps {
@@ -57,7 +53,7 @@ const MarketCalendar = ({ onClose }: MarketCalendarProps) => {
   
   // Check if selected date is a holiday
   const isHoliday = selectedDate ? 
-    INDIAN_MARKET_HOLIDAYS_2024.some(holiday => 
+    INDIAN_MARKET_HOLIDAYS_2025.some(holiday => 
       holiday.getDate() === selectedDate.getDate() && 
       holiday.getMonth() === selectedDate.getMonth()) : 
     false;
@@ -83,7 +79,7 @@ const MarketCalendar = ({ onClose }: MarketCalendarProps) => {
         </button>
         <CardTitle className="flex items-center gap-2 text-xl">
           <CalendarIcon className="h-5 w-5 text-blue-600" />
-          Indian Stock Market Calendar
+          Indian Stock Market Calendar 2025
         </CardTitle>
         <CardDescription>
           NSE & BSE trading days and hours
@@ -107,7 +103,7 @@ const MarketCalendar = ({ onClose }: MarketCalendarProps) => {
               onSelect={setSelectedDate}
               className="rounded border p-3 pointer-events-auto"
               modifiers={{
-                holiday: INDIAN_MARKET_HOLIDAYS_2024,
+                holiday: INDIAN_MARKET_HOLIDAYS_2025,
                 weekend: (date: Date) => isWeekend(date),
               }}
               modifiersClassNames={{
@@ -189,7 +185,7 @@ const MarketCalendar = ({ onClose }: MarketCalendarProps) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {INDIAN_MARKET_HOLIDAYS_2024.map((holiday, index) => (
+                  {INDIAN_MARKET_HOLIDAYS_2025.map((holiday, index) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-600">
                         {format(holiday, 'MMM d, yyyy')}
