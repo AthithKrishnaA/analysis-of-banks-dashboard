@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { MapPin, Users, TrendingUp, TrendingDown, Building, Award, GitBranch, ChevronDown, ChevronUp, View3d, View } from 'lucide-react';
+import { MapPin, Users, TrendingUp, TrendingDown, Building, Award, GitBranch, ChevronDown, ChevronUp, View, Box } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BranchNetwork3D from './BranchNetwork3D';
@@ -211,7 +210,7 @@ const BranchNetwork = ({ selectedBank }: BranchNetworkProps) => {
               {view3D ? (
                 <>2D View <View className="h-4 w-4" /></>
               ) : (
-                <>3D View <View3d className="h-4 w-4" /></>
+                <>3D View <Box className="h-4 w-4" /></>
               )}
             </Button>
             <Button 

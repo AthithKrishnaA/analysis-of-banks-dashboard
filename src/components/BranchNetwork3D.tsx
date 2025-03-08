@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Text, CameraShake } from '@react-three/drei';
-import { Vector3 } from 'three';
+import * as THREE from 'three';
 
 interface Branch {
   type: string;
@@ -39,7 +39,7 @@ const BranchSphere = ({ position, size, color, label, count, onClick }: {
   });
 
   return (
-    <group position={new Vector3(...position)}>
+    <group position={new THREE.Vector3(...position)}>
       <mesh
         ref={meshRef}
         onClick={onClick}
