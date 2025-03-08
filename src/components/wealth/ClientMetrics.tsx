@@ -1,17 +1,48 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Percent, TrendingUp, MousePointerClick } from 'lucide-react';
+import { Users, Percent, TrendingUp, MousePointerClick, Circle, CheckCircle2, ToggleRight } from 'lucide-react';
 import MetricsCard from '../MetricsCard';
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface ClientMetricsProps {
   selectedBank: string;
 }
 
+interface ClientSegment {
+  name: string;
+  enabled: boolean;
+  features: string[];
+}
+
 const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
   const [showDetailedView, setShowDetailedView] = useState(false);
   const { toast } = useToast();
+
+  // Client segments with feature availability
+  const [segments, setSegments] = useState<ClientSegment[]>([
+    { 
+      name: "High Net Worth", 
+      enabled: false,
+      features: ["Premium Advisory", "Global Portfolio", "Tax Optimization", "Concierge Services"]
+    },
+    { 
+      name: "Retail", 
+      enabled: false,
+      features: ["Basic Advisory", "National Portfolio", "Retirement Planning", "Mobile Banking"]
+    },
+    { 
+      name: "Corporate", 
+      enabled: false,
+      features: ["Treasury Management", "Cross-Border Services", "Trade Finance", "FX Solutions"]
+    },
+    { 
+      name: "Senior Citizens", 
+      enabled: false,
+      features: ["Fixed Income", "Health Insurance", "Estate Planning", "Priority Service"]
+    }
+  ]);
 
   const generateClientMetrics = () => {
     const metricsMap = {
@@ -52,10 +83,28 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
 
   const metrics = generateClientMetrics();
 
-  const handleSegmentClick = (segment: string) => {
+  const handleSegmentClick = (segmentIndex: number) => {
+    const updatedSegments = [...segments];
+    updatedSegments[segmentIndex].enabled = !updatedSegments[segmentIndex].enabled;
+    setSegments(updatedSegments);
+    
     toast({
-      title: "Client Segment Selected",
-      description: `Analyzing ${segment} segment for ${selectedBank}`,
+      title: updatedSegments[segmentIndex].enabled ? "Segment Enabled" : "Segment Disabled",
+      description: `${updatedSegments[segmentIndex].name} segment for ${selectedBank} ${updatedSegments[segmentIndex].enabled ? 'enabled' : 'disabled'}`,
+      duration: 3000,
+    });
+  };
+
+  const enableAllFeatures = () => {
+    const updatedSegments = segments.map(segment => ({
+      ...segment,
+      enabled: true
+    }));
+    setSegments(updatedSegments);
+    
+    toast({
+      title: "All Segments Enabled",
+      description: `All client segments have been enabled for ${selectedBank}`,
       duration: 3000,
     });
   };
@@ -92,16 +141,70 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
 
           {showDetailedView && (
             <div className="mt-6 border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-3">Client Segments</h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {["High Net Worth", "Retail", "Corporate", "Senior Citizens"].map((segment) => (
-                  <button
-                    key={segment}
-                    onClick={() => handleSegmentClick(segment)}
-                    className="text-xs bg-white border border-gray-200 hover:bg-gray-50 px-3 py-2 rounded-md transition-colors hover:shadow-sm"
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-gray-700">Client Segments</h4>
+                <Button 
+                  onClick={enableAllFeatures}
+                  size="sm" 
+                  variant="outline"
+                  className="text-xs gap-1 h-8"
+                >
+                  <CheckCircle2 className="h-3 w-3" />
+                  Enable All Features
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {segments.map((segment, index) => (
+                  <div 
+                    key={segment.name}
+                    className={`border rounded-md transition-all ${
+                      segment.enabled ? 'border-blue-300 bg-blue-50' : 'border-gray-200'
+                    }`}
                   >
-                    {segment}
-                  </button>
+                    <div className="flex items-center justify-between p-3 border-b">
+                      <h5 className="text-sm font-medium">{segment.name}</h5>
+                      <Button
+                        onClick={() => handleSegmentClick(index)}
+                        size="sm"
+                        variant={segment.enabled ? "default" : "outline"}
+                        className="h-7 text-xs"
+                      >
+                        {segment.enabled ? (
+                          <span className="flex items-center gap-1">
+                            <ToggleRight className="h-3 w-3" />
+                            Enabled
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <Circle className="h-3 w-3" />
+                            Disabled
+                          </span>
+                        )}
+                      </Button>
+                    </div>
+                    <div className="p-3">
+                      <ul className="space-y-2">
+                        {segment.features.map((feature, featureIndex) => (
+                          <li 
+                            key={featureIndex} 
+                            className={`text-xs flex items-center gap-1.5 ${
+                              segment.enabled 
+                                ? 'text-blue-800' 
+                                : 'text-gray-500'
+                            }`}
+                          >
+                            {segment.enabled ? (
+                              <CheckCircle2 className="h-3 w-3 text-green-600" />
+                            ) : (
+                              <Circle className="h-3 w-3 text-gray-400" />
+                            )}
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 ))}
               </div>
               
