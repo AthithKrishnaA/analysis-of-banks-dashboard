@@ -3,6 +3,8 @@ import React, { useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls, Text, CameraShake } from '@react-three/drei';
 import * as THREE from 'three';
+import { toast } from "@/components/ui/use-toast";
+import { Info, Circle, CircleDot, HelpCircle } from 'lucide-react';
 
 interface Branch {
   type: string;
@@ -73,6 +75,20 @@ const BranchSphere = ({ position, size, color, label, count, onClick }: {
       >
         {count.toLocaleString()}
       </Text>
+      {/* Info icon to indicate clickable */}
+      <mesh position={[0, size - 0.2, size]}>
+        <sphereGeometry args={[0.15, 16, 16]} />
+        <meshStandardMaterial color="#3b82f6" />
+      </mesh>
+      <Text
+        position={[0, size - 0.2, size + 0.2]}
+        fontSize={0.2}
+        color="white"
+        anchorX="center"
+        anchorY="middle"
+      >
+        i
+      </Text>
     </group>
   );
 };
@@ -80,7 +96,7 @@ const BranchSphere = ({ position, size, color, label, count, onClick }: {
 const Scene = ({ branchData, totalBranches, onBranchSelect }: {
   branchData: BranchNetwork3DProps['branchData'];
   totalBranches: number;
-  onBranchSelect: (type: string) => void;
+  onBranchSelect: (type: string, count: number, percentage: number) => void;
 }) => {
   const { camera } = useThree();
   
@@ -126,7 +142,7 @@ const Scene = ({ branchData, totalBranches, onBranchSelect }: {
             color={branch.color}
             label={branch.type}
             count={branch.count}
-            onClick={() => onBranchSelect(branch.type)}
+            onClick={() => onBranchSelect(branch.type, branch.count, percentage * 100)}
           />
         );
       })}
@@ -154,16 +170,85 @@ const Scene = ({ branchData, totalBranches, onBranchSelect }: {
   );
 };
 
+const getBranchDetails = (type: string) => {
+  switch(type) {
+    case 'Urban':
+      return {
+        avgTransactions: '1,450 daily',
+        customerFootfall: '210 daily',
+        topServices: 'Loans, Investment Advisory',
+        digitalAdoption: '78%',
+        staffCount: '15-20'
+      };
+    case 'Semi-Urban':
+      return {
+        avgTransactions: '980 daily',
+        customerFootfall: '145 daily',
+        topServices: 'Agricultural Loans, Savings',
+        digitalAdoption: '65%',
+        staffCount: '10-15'
+      };
+    case 'Rural':
+      return {
+        avgTransactions: '650 daily',
+        customerFootfall: '95 daily',
+        topServices: 'Microfinance, Basic Banking',
+        digitalAdoption: '42%',
+        staffCount: '5-10'
+      };
+    case 'Metro':
+      return {
+        avgTransactions: '2,200 daily',
+        customerFootfall: '320 daily',
+        topServices: 'Wealth Management, Corporate Banking',
+        digitalAdoption: '92%',
+        staffCount: '25-35'
+      };
+    default:
+      return {
+        avgTransactions: 'N/A',
+        customerFootfall: 'N/A',
+        topServices: 'N/A',
+        digitalAdoption: 'N/A',
+        staffCount: 'N/A'
+      };
+  }
+};
+
 const BranchNetwork3D: React.FC<BranchNetwork3DProps> = ({ 
   branchData, 
   totalBranches 
 }) => {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   
-  const handleBranchSelect = (type: string) => {
+  const handleBranchSelect = (type: string, count: number, percentage: number) => {
     setSelectedBranch(type);
-    // You could trigger an event or update state in the parent component
-    console.log(`Selected branch type: ${type}`);
+    const details = getBranchDetails(type);
+    
+    // Show a toast with branch details
+    toast({
+      title: `${type} Branch Network Details`,
+      description: (
+        <div className="space-y-2">
+          <p className="font-semibold">{count.toLocaleString()} branches ({percentage.toFixed(1)}% of network)</p>
+          <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-sm">
+            <span className="text-gray-500">Avg. Transactions:</span>
+            <span>{details.avgTransactions}</span>
+            <span className="text-gray-500">Customer Footfall:</span>
+            <span>{details.customerFootfall}</span>
+            <span className="text-gray-500">Top Services:</span>
+            <span>{details.topServices}</span>
+            <span className="text-gray-500">Digital Adoption:</span>
+            <span>{details.digitalAdoption}</span>
+            <span className="text-gray-500">Staff Count:</span>
+            <span>{details.staffCount}</span>
+          </div>
+        </div>
+      ),
+      duration: 5000,
+    });
+    
+    console.log(`Selected branch type: ${type} with ${count} branches`);
   };
 
   return (
@@ -176,10 +261,14 @@ const BranchNetwork3D: React.FC<BranchNetwork3DProps> = ({
         />
       </Canvas>
       
-      {/* Optional overlay with interaction instructions */}
+      {/* Overlay with interaction instructions */}
       <div className="absolute bottom-4 left-4 bg-black/50 text-white text-sm p-2 rounded">
-        <p>🖱️ Drag to rotate | Scroll to zoom</p>
-        <p>👆 Click on spheres for details</p>
+        <p className="flex items-center gap-1">
+          <Circle className="h-3 w-3" /> Drag to rotate | Scroll to zoom
+        </p>
+        <p className="flex items-center gap-1">
+          <CircleDot className="h-3 w-3" /> Click on spheres for detailed info
+        </p>
       </div>
     </div>
   );
