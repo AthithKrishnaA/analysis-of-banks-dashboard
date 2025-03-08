@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { MapPin, Users, TrendingUp, Building, Award, GitBranch, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Users, TrendingUp, TrendingDown, Building, Award, GitBranch, ChevronDown, ChevronUp, View3d, View } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import BranchNetwork3D from './BranchNetwork3D';
 
 interface BranchNetworkProps {
   selectedBank: string;
@@ -155,6 +156,7 @@ const branchData = {
 
 const BranchNetwork = ({ selectedBank }: BranchNetworkProps) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [view3D, setView3D] = useState(false);
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
   const EFFICIENCY_COLORS = ['#4ade80', '#facc15', '#f87171'];
   
@@ -182,6 +184,10 @@ const BranchNetwork = ({ selectedBank }: BranchNetworkProps) => {
   const bankData = branchData[selectedBank];
   const totalBranches = branchDistribution.reduce((sum, item) => sum + item.value, 0);
 
+  const toggleView = () => {
+    setView3D(!view3D);
+  };
+
   return (
     <Card className="overflow-hidden">
       <CardHeader>
@@ -195,61 +201,82 @@ const BranchNetwork = ({ selectedBank }: BranchNetworkProps) => {
               Comprehensive analysis of branch distribution and performance
             </CardDescription>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setShowDetails(!showDetails)}
-            className="gap-1"
-          >
-            {showDetails ? (
-              <>Less Details <ChevronUp className="h-4 w-4" /></>
-            ) : (
-              <>More Details <ChevronDown className="h-4 w-4" /></>
-            )}
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={toggleView}
+              className="gap-1"
+            >
+              {view3D ? (
+                <>2D View <View className="h-4 w-4" /></>
+              ) : (
+                <>3D View <View3d className="h-4 w-4" /></>
+              )}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setShowDetails(!showDetails)}
+              className="gap-1"
+            >
+              {showDetails ? (
+                <>Less Details <ChevronUp className="h-4 w-4" /></>
+              ) : (
+                <>More Details <ChevronDown className="h-4 w-4" /></>
+              )}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col md:flex-row items-center justify-around">
-          <div className="h-[200px] w-[200px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={branchDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {branchDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value} branches`, '']} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          
-          <div className="flex flex-col space-y-2 text-center md:text-left mt-4 md:mt-0">
-            <div className="text-3xl font-bold text-blue-900">{totalBranches.toLocaleString()}</div>
-            <div className="text-sm text-gray-500">Total branches nationwide</div>
+        {view3D ? (
+          <BranchNetwork3D 
+            branchData={bankData} 
+            totalBranches={totalBranches} 
+          />
+        ) : (
+          <div className="flex flex-col md:flex-row items-center justify-around">
+            <div className="h-[200px] w-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={branchDistribution}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {branchDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => [`${value} branches`, '']} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
             
-            <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-4">
-              {branchDistribution.map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <div className="text-sm">
-                    <span className="font-medium">{item.name}:</span> {Math.round((item.value / totalBranches) * 100)}%
+            <div className="flex flex-col space-y-2 text-center md:text-left mt-4 md:mt-0">
+              <div className="text-3xl font-bold text-blue-900">{totalBranches.toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Total branches nationwide</div>
+              
+              <div className="grid grid-cols-2 gap-x-8 gap-y-2 mt-4">
+                {branchDistribution.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                    <div className="text-sm">
+                      <span className="font-medium">{item.name}:</span> {Math.round((item.value / totalBranches) * 100)}%
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {showDetails && (
           <div className="mt-8">
