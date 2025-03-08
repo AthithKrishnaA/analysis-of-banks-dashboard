@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, Mail, Lock, User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -44,12 +45,27 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Success!",
-        description: "Please check your email to verify your account.",
+      // Show success toast using sonner for better visibility
+      toast.success("Successfully signed up! Please log in now.", {
+        duration: 5000,
       });
+      
+      // Show UI toast as well for legacy support
+      uiToast({
+        title: "Success!",
+        description: "You have successfully signed up. Please log in now.",
+      });
+      
+      // Reset form and switch to signin tab
+      const signinTab = document.querySelector('[data-state="inactive"][value="signin"]') as HTMLElement;
+      if (signinTab) {
+        signinTab.click();
+      }
+      setEmail('');
+      setPassword('');
+      
     } catch (error: any) {
-      toast({
+      uiToast({
         title: "Error",
         description: error.message,
         variant: "destructive",
@@ -73,7 +89,7 @@ const Auth = () => {
 
       navigate('/');
     } catch (error: any) {
-      toast({
+      uiToast({
         title: "Error",
         description: error.message,
         variant: "destructive",
