@@ -46,7 +46,7 @@ const Auth = () => {
 
       toast({
         title: "Success!",
-        description: ""Successfully signed up! Please log in now.",
+        description: ""Successfully signed up!",
       });
     } catch (error: any) {
       toast({
