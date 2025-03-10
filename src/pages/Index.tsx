@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -22,44 +21,12 @@ import { useStockData } from '@/hooks/useStockData';
 import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const getMetricsForBank = (bankId: string) => {
-  const metrics = {
-    'SBIN.NS': {
-      previousClose: '776.45',
-      open: '777.20',
-      volume: '8.2M',
-      marketCap: '6.94T'
-    },
-    'AXISBANK.NS': {
-      previousClose: '1011.85',
-      open: '1012.30',
-      volume: '4.5M',
-      marketCap: '3.12T'
-    },
-    'HDFCBANK.NS': {
-      previousClose: '1712.55',
-      open: '1713.25',
-      volume: '6.8M',
-      marketCap: '8.56T'
-    },
-    'KOTAKBANK.NS': {
-      previousClose: '1908.75',
-      open: '1909.15',
-      volume: '3.2M',
-      marketCap: '3.79T'
-    },
-    'ICICIBANK.NS': {
-      previousClose: '1265.90',
-      open: '1266.35',
-      volume: '5.9M',
-      marketCap: '4.43T'
-    }
-  };
-  return metrics[bankId];
-};
-
 const bankMetricsData = {
   'SBIN.NS': {
+    previousClose: '776.45',
+    open: '777.20',
+    volume: '8.2M',
+    marketCap: '6.94T',
     loanData: [
       { name: 'Corporate', value: 35 },
       { name: 'Retail', value: 40 },
@@ -73,6 +40,10 @@ const bankMetricsData = {
     },
   },
   'AXISBANK.NS': {
+    previousClose: '1011.85',
+    open: '1012.30',
+    volume: '4.5M',
+    marketCap: '3.12T',
     loanData: [
       { name: 'Corporate', value: 42 },
       { name: 'Retail', value: 35 },
@@ -86,6 +57,10 @@ const bankMetricsData = {
     },
   },
   'HDFCBANK.NS': {
+    previousClose: '1712.55',
+    open: '1713.25',
+    volume: '6.8M',
+    marketCap: '8.56T',
     loanData: [
       { name: 'Corporate', value: 45 },
       { name: 'Retail', value: 38 },
@@ -99,6 +74,10 @@ const bankMetricsData = {
     },
   },
   'KOTAKBANK.NS': {
+    previousClose: '1908.75',
+    open: '1909.15',
+    volume: '3.2M',
+    marketCap: '3.79T',
     loanData: [
       { name: 'Corporate', value: 38 },
       { name: 'Retail', value: 42 },
@@ -112,6 +91,10 @@ const bankMetricsData = {
     },
   },
   'ICICIBANK.NS': {
+    previousClose: '1265.90',
+    open: '1266.35',
+    volume: '5.9M',
+    marketCap: '4.43T',
     loanData: [
       { name: 'Corporate', value: 40 },
       { name: 'Retail', value: 37 },
@@ -160,7 +143,7 @@ const Index = () => {
     });
   };
 
-  const metrics = getMetricsForBank(selectedBank);
+  const metrics = bankMetricsData[selectedBank];
   const { 
     data, 
     toggleInteractiveMode, 

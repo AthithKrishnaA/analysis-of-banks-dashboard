@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface MetricProps {
@@ -10,37 +10,38 @@ interface MetricProps {
 }
 
 const MetricsCard = ({ label, value }: MetricProps) => {
-  const [isHovered, setIsHovered] = useState(false);
   const { toast } = useToast();
 
-  // Generate a random trend percentage between -5% and +15%
-  const getTrendData = () => {
-    const isPositive = Math.random() > 0.3; // 70% chance of positive trend
-    const percentage = isPositive 
-      ? (Math.random() * 15).toFixed(1)
-      : (Math.random() * 5).toFixed(1);
-    
-    return {
-      isPositive,
-      percentage
-    };
-  };
-
-  const trend = getTrendData();
-
   const handleInfoClick = () => {
+    let description = '';
+    
+    switch(label) {
+      case 'Previous Close':
+        description = `Average closing price from the previous trading day: ${value}`;
+        break;
+      case 'Open':
+        description = `Average opening price from today: ${value}`;
+        break;
+      case 'Volume':
+        description = `Average daily trading volume: ${value}`;
+        break;
+      case 'Market Cap':
+        description = `Average daily market capitalization: ${value}`;
+        break;
+      default:
+        description = `This shows the daily average ${label.toLowerCase()} for the selected bank. Current value: ${value}`;
+    }
+    
     toast({
-      title: `About ${label}`,
-      description: `This metric shows ${label.toLowerCase()} for the selected bank. Current value: ${value}`,
+      title: `Daily Average: ${label}`,
+      description,
       duration: 3000,
     });
   };
 
   return (
     <Card 
-      className={`bg-gradient-to-br from-white to-blue-50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 ${isHovered ? 'ring-2 ring-blue-200' : ''}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="bg-gradient-to-br from-white to-blue-50 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
     >
       <div className="p-4">
         <div className="flex justify-between items-start">
@@ -55,22 +56,6 @@ const MetricsCard = ({ label, value }: MetricProps) => {
         <p className="text-bank-primary font-bold text-2xl mt-2 bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent">
           {value}
         </p>
-        
-        {isHovered && (
-          <div className="mt-3 flex items-center text-xs font-medium animate-fade-in">
-            {trend.isPositive ? (
-              <div className="text-green-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                <span>+{trend.percentage}% from last quarter</span>
-              </div>
-            ) : (
-              <div className="text-red-500 flex items-center">
-                <TrendingDown className="h-3 w-3 mr-1" />
-                <span>-{trend.percentage}% from last quarter</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </Card>
   );
