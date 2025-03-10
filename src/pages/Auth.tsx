@@ -7,14 +7,31 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, Mail, Lock, User } from 'lucide-react';
+import { Loader2, Mail, Lock, User, School, TrendingUp, Building, Briefcase } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+// Define the available user types
+const userTypes = [
+  { id: 'student', label: 'Student', icon: School, description: 'Access student-focused banking products and educational resources' },
+  { id: 'investor', label: 'Investor', icon: TrendingUp, description: 'Track investments and access advanced market analysis tools' },
+  { id: 'loan_seeker', label: 'Seeking a Loan', icon: Building, description: 'Find loan options and financial planning tools' },
+  { id: 'bank_employee', label: 'Bank Employee', icon: Briefcase, description: 'Access employee tools and internal dashboards' },
+];
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showUserTypeModal, setShowUserTypeModal] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -27,12 +44,52 @@ const Auth = () => {
     });
   }, [navigate]);
 
+  const handleUserTypeSelection = async (userType: string) => {
+    if (!selectedUserId) return;
+    
+    setLoading(true);
+    try {
+      // Update the user's metadata with the selected user type
+      const { error } = await supabase.auth.updateUser({
+        data: { user_type: userType }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Profile Updated",
+        description: `Your profile has been set up as a ${userType.replace('_', ' ')}.`,
+      });
+
+      // Close the modal and redirect to login
+      setShowUserTypeModal(false);
+      
+      // After updating the user type, sign in the user automatically
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+      
+      navigate('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -44,9 +101,16 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // Store the user ID for the next step
+      if (data.user) {
+        setSelectedUserId(data.user.id);
+        // Show the user type selection modal
+        setShowUserTypeModal(true);
+      }
+
       toast({
         title: "Success!",
-        description: "Successfully signed up! Please log in now.",
+        description: "Successfully signed up! Please select your user type.",
       });
     } catch (error: any) {
       toast({
@@ -216,6 +280,38 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* User Type Selection Modal */}
+      <Dialog open={showUserTypeModal} onOpenChange={setShowUserTypeModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>What best describes you?</DialogTitle>
+            <DialogDescription>
+              Select your user type to personalize your banking experience
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 gap-4 py-4">
+            {userTypes.map(type => (
+              <Button
+                key={type.id}
+                variant="outline"
+                className="flex justify-start items-center gap-3 h-auto p-4 hover:bg-slate-50"
+                onClick={() => handleUserTypeSelection(type.id)}
+                disabled={loading}
+              >
+                <div className="bg-blue-100 p-2 rounded-full">
+                  <type.icon className="h-5 w-5 text-blue-600" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-medium text-gray-900">{type.label}</h3>
+                  <p className="text-xs text-gray-500">{type.description}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
