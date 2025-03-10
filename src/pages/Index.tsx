@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import StockChart from '../components/StockChart';
@@ -22,8 +22,7 @@ import { useStockData } from '@/hooks/useStockData';
 import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Daily average metrics for each bank that won't change throughout the day
-const getDailyAverageMetrics = (bankId: string) => {
+const getMetricsForBank = (bankId: string) => {
   const metrics = {
     'SBIN.NS': {
       previousClose: '776.45',
@@ -161,9 +160,7 @@ const Index = () => {
     });
   };
 
-  // Get daily average metrics that won't change
-  const metrics = getDailyAverageMetrics(selectedBank);
-  
+  const metrics = getMetricsForBank(selectedBank);
   const { 
     data, 
     toggleInteractiveMode, 
