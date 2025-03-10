@@ -9,10 +9,21 @@ import { Clock, AlertTriangle } from 'lucide-react';
 interface StockChartProps {
   selectedBank: string;
   onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void;
+  onPriceUpdate?: (price: string, change: string, changePercent: string) => void;
 }
 
-const StockChart = ({ selectedBank, onSentimentUpdate }: StockChartProps) => {
+const StockChart = ({ selectedBank, onSentimentUpdate, onPriceUpdate }: StockChartProps) => {
   const { data, priceChange, sentiment, isMarketOpen } = useStockData(selectedBank, onSentimentUpdate);
+
+  // When data updates, notify parent component
+  React.useEffect(() => {
+    if (data.length > 0 && onPriceUpdate) {
+      const latestPrice = data[data.length - 1].price.toFixed(2);
+      const changeValue = priceChange > 0 ? `+${priceChange.toFixed(2)}` : priceChange.toFixed(2);
+      const changePercentValue = priceChange > 0 ? `+${priceChange.toFixed(2)}` : `${priceChange.toFixed(2)}`;
+      onPriceUpdate(latestPrice, changeValue, changePercentValue);
+    }
+  }, [data, priceChange, onPriceUpdate]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm h-[400px]">

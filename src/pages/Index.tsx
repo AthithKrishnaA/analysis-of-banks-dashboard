@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -134,15 +135,29 @@ const Index = () => {
   });
   const [priceChanges, setPriceChanges] = useState<number[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+  const [livePriceData, setLivePriceData] = useState<{
+    price: string;
+    change: string;
+    changePercent: string;
+  } | undefined>(undefined);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
+    setLivePriceData(undefined); // Reset price data when bank changes
     console.log('Selected bank changed:', bankId);
   };
 
   const handleSentimentUpdate = (newSentiment: any, changes: number[]) => {
     setSentiment(newSentiment);
     setPriceChanges(changes);
+  };
+
+  const handlePriceUpdate = (price: string, change: string, changePercent: string) => {
+    setLivePriceData({
+      price,
+      change,
+      changePercent
+    });
   };
 
   const metrics = getMetricsForBank(selectedBank);
@@ -170,7 +185,7 @@ const Index = () => {
           </Link>
         </div>
         
-        <Header selectedBank={selectedBank} />
+        <Header selectedBank={selectedBank} livePriceData={livePriceData} />
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <MetricsCard label="Previous Close" value={`₹${metrics.previousClose}`} />
@@ -183,6 +198,7 @@ const Index = () => {
           <StockChart 
             selectedBank={selectedBank} 
             onSentimentUpdate={handleSentimentUpdate}
+            onPriceUpdate={handlePriceUpdate}
           />
         </div>
 

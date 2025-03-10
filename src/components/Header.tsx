@@ -1,11 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Building2 } from "lucide-react";
 import { format } from 'date-fns';
 
 interface HeaderProps {
   selectedBank: string;
+  livePriceData?: {
+    price: string;
+    change: string;
+    changePercent: string;
+  };
 }
 
 const initialBankInfo = {
@@ -51,48 +56,28 @@ const initialBankInfo = {
   }
 };
 
-const Header = ({ selectedBank }: HeaderProps) => {
+const Header = ({ selectedBank, livePriceData }: HeaderProps) => {
   const [bankInfo, setBankInfo] = useState(initialBankInfo);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   
-  useEffect(() => {
-    // Function to simulate real-time price updates
-    const updatePrices = () => {
+  // Update based on live price data from StockChart
+  React.useEffect(() => {
+    if (livePriceData) {
       setBankInfo(prevInfo => {
         const updatedInfo = { ...prevInfo };
         
-        // Update the price for the selected bank with small random changes
-        const currentBank = updatedInfo[selectedBank];
-        const currentPrice = parseFloat(currentBank.price);
-        const priceChange = currentPrice * (Math.random() * 0.01 - 0.005); // -0.5% to +0.5%
-        const newPrice = (currentPrice + priceChange).toFixed(2);
-        
-        // Calculate new change values
-        const initialPrice = parseFloat(initialBankInfo[selectedBank].price);
-        const totalChange = (parseFloat(newPrice) - initialPrice).toFixed(2);
-        const changePercent = ((parseFloat(newPrice) - initialPrice) / initialPrice * 100).toFixed(2);
-        
-        // Update the bank info
         updatedInfo[selectedBank] = {
-          ...currentBank,
-          price: newPrice,
-          change: totalChange.startsWith('-') ? totalChange : `+${totalChange}`,
-          changePercent: changePercent.startsWith('-') ? `${changePercent}` : `+${changePercent}`
+          ...updatedInfo[selectedBank],
+          price: livePriceData.price,
+          change: livePriceData.change,
+          changePercent: livePriceData.changePercent
         };
         
         setLastUpdated(new Date());
         return updatedInfo;
       });
-    };
-    
-    // Update prices every 15 seconds
-    const interval = setInterval(updatePrices, 15000);
-    
-    // Initial update
-    updatePrices();
-    
-    return () => clearInterval(interval);
-  }, [selectedBank]);
+    }
+  }, [livePriceData, selectedBank]);
   
   console.log('Header - Selected Bank:', selectedBank);
   console.log('Header - Bank Info:', bankInfo[selectedBank]);
