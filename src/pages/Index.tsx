@@ -20,6 +20,9 @@ import DigitalBankingMetrics from '../components/DigitalBankingMetrics';
 import PortfolioRecommendations from '../components/wealth/PortfolioRecommendations';
 import { useStockData } from '@/hooks/useStockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Newspaper, CreditCard, Calculator, Bell, BanknoteIcon, IndianRupee, ChartBar } from 'lucide-react';
 
 const bankMetricsData = {
   'SBIN.NS': {
@@ -144,7 +147,53 @@ const Index = () => {
   };
 
   const metrics = bankMetricsData[selectedBank];
-  const { data } = useStockData(selectedBank, handleSentimentUpdate);
+  const { data, news } = useStockData(selectedBank, handleSentimentUpdate);
+
+  // Bank News Data
+  const bankNews = [
+    {
+      bank: 'SBIN.NS',
+      news: [
+        { title: 'SBI Reports 20% Growth in Q3 Profits', date: '2023-10-15', impact: 'positive' },
+        { title: 'SBI Launches New Digital Banking Platform', date: '2023-10-10', impact: 'positive' },
+        { title: 'SBI Increases Interest Rates on Fixed Deposits', date: '2023-10-05', impact: 'neutral' },
+      ]
+    },
+    {
+      bank: 'HDFCBANK.NS',
+      news: [
+        { title: 'HDFC Bank Completes Merger with HDFC Ltd', date: '2023-10-18', impact: 'positive' },
+        { title: 'HDFC Bank Expands Rural Banking Initiative', date: '2023-10-12', impact: 'positive' },
+        { title: 'HDFC Bank Named "Best Bank" in Asia', date: '2023-10-07', impact: 'positive' },
+      ]
+    },
+    {
+      bank: 'ICICIBANK.NS',
+      news: [
+        { title: 'ICICI Bank Launches AI-Powered Customer Service', date: '2023-10-17', impact: 'positive' },
+        { title: 'ICICI Bank Reports Strong Loan Growth', date: '2023-10-11', impact: 'positive' },
+        { title: 'ICICI Bank Revamps Mobile Banking App', date: '2023-10-06', impact: 'neutral' },
+      ]
+    },
+    {
+      bank: 'AXISBANK.NS',
+      news: [
+        { title: 'Axis Bank Partners with Fintech Startups', date: '2023-10-16', impact: 'positive' },
+        { title: 'Axis Bank Expands Wealth Management Services', date: '2023-10-09', impact: 'positive' },
+        { title: 'Axis Bank Announces Leadership Change', date: '2023-10-04', impact: 'neutral' },
+      ]
+    },
+    {
+      bank: 'KOTAKBANK.NS',
+      news: [
+        { title: 'Kotak Bank Launches New Credit Card Offerings', date: '2023-10-19', impact: 'positive' },
+        { title: 'Kotak Bank Invests in Digital Transformation', date: '2023-10-13', impact: 'positive' },
+        { title: 'Kotak Bank Opens 100 New Branches', date: '2023-10-08', impact: 'positive' },
+      ]
+    },
+  ];
+
+  const currentBankNews = bankNews.find(item => item.bank === selectedBank)?.news || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
@@ -178,6 +227,67 @@ const Index = () => {
             onPriceUpdate={handlePriceUpdate}
           />
         </div>
+
+        {/* Interactive Banking Tools Section */}
+        <Card className="bg-white rounded-lg shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BanknoteIcon className="h-5 w-5 text-blue-500" />
+              Interactive Banking Tools
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+                <Calculator className="h-8 w-8 text-blue-600" />
+                <span>Loan Calculator</span>
+              </Button>
+              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+                <CreditCard className="h-8 w-8 text-green-600" />
+                <span>Card Offers</span>
+              </Button>
+              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+                <IndianRupee className="h-8 w-8 text-amber-600" />
+                <span>FD Rates</span>
+              </Button>
+              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+                <Bell className="h-8 w-8 text-purple-600" />
+                <span>Price Alerts</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Bank News Section */}
+        <Card className="bg-white rounded-lg shadow-lg">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-blue-500" />
+              Recent Bank News
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {currentBankNews.map((item, index) => (
+                <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium">{item.title}</h3>
+                    <span 
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        item.impact === 'positive' ? 'bg-green-100 text-green-800' : 
+                        item.impact === 'negative' ? 'bg-red-100 text-red-800' : 
+                        'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {item.impact}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">{item.date}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="overview" className="w-full" onValueChange={(value) => setActiveTab(value)}>
           <TabsList className="grid grid-cols-4 mb-4">
