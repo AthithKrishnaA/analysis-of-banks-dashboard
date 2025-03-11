@@ -5,6 +5,7 @@ import { Users, Percent, TrendingUp, MousePointerClick, Circle, CheckCircle2, To
 import MetricsCard from '../MetricsCard';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import ClientSegmentDetails from './ClientSegmentDetails';
 
 interface ClientMetricsProps {
   selectedBank: string;
@@ -229,6 +230,11 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
           )}
         </CardContent>
       </Card>
+      
+      {/* Add segment details when segments are enabled */}
+      {segments.some(segment => segment.enabled) && (
+        <ClientSegmentDetails selectedBank={selectedBank} segments={segments} />
+      )}
     </div>
   );
 };

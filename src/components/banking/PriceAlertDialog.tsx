@@ -104,6 +104,9 @@ const PriceAlertDialog: React.FC<PriceAlertDialogProps> = ({
                 placeholder="Enter your email"
                 required
               />
+              <p className="text-xs text-gray-500">
+                You'll receive an email notification when the price reaches your target
+              </p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -147,9 +150,14 @@ const PriceAlertDialog: React.FC<PriceAlertDialogProps> = ({
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">Alert Successfully Set!</h3>
             <p className="text-gray-600 mb-6">
-              We'll notify you at {email} when {getBankName(selectedBank)} stock price goes {alertType} ₹{pricePoint}
+              We'll notify you at <span className="font-semibold">{email}</span> when {getBankName(selectedBank)} stock price goes {alertType} ₹{pricePoint}
             </p>
-            <Button onClick={handleReset} variant="outline">Set Another Alert</Button>
+            <div className="flex flex-col gap-2">
+              <Button onClick={handleReset} variant="outline">Set Another Alert</Button>
+              <p className="text-xs text-gray-500">
+                Please check your email spam folder if you don't receive notifications
+              </p>
+            </div>
           </div>
         )}
         
