@@ -1,3 +1,4 @@
+
 export const bankColors = {
   'HDFC Bank': '#1A1F2C',      // Dark navy blue
   'State Bank of India': '#403E43',  // Dark charcoal
@@ -20,6 +21,15 @@ export const baseValues = {
   'ICICI Bank': 1267.00,
   'Axis Bank': 1013.00,
   'Kotak Bank': 1910.00
+};
+
+// Bank website URLs
+export const bankWebsites = {
+  'HDFCBANK.NS': 'https://www.hdfcbank.com/',
+  'SBIN.NS': 'https://www.onlinesbi.sbi/',
+  'ICICIBANK.NS': 'https://www.icicibank.com/',
+  'AXISBANK.NS': 'https://www.axisbank.com/',
+  'KOTAKBANK.NS': 'https://www.kotak.com/'
 };
 
 // Volatility factors for each bank

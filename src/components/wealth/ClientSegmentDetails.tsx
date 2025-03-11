@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, ChevronDown, ChevronRight, Star, Shield, Landmark, BarChart4 } from 'lucide-react';
+import { Users, ChevronDown, ChevronRight, Star, Shield, Landmark, BarChart4, HeartHandshake, Briefcase, UserCheck, Wallet } from 'lucide-react';
 
 interface ClientSegmentDetailsProps {
   selectedBank: string;
@@ -10,6 +10,7 @@ interface ClientSegmentDetailsProps {
     enabled: boolean;
     features: string[];
   }[];
+  displayBelow?: boolean;
 }
 
 const segmentDetails = {
@@ -23,6 +24,19 @@ const segmentDetails = {
       "Preferential foreign exchange rates",
       "Tax advisory services",
       "Estate planning services"
+    ],
+    eligibility: [
+      "Maintain a minimum average monthly balance of ₹50 Lakhs",
+      "Maintain investments of ₹30 Lakhs or above",
+      "Annual income of ₹75 Lakhs or above",
+      "Business owners with turnover of ₹2 Crores or more"
+    ],
+    products: [
+      "International Debit & Credit Cards",
+      "Premium Investment Advisory Services",
+      "Offshore Investment Opportunities",
+      "Customized Loan Products",
+      "Private Equity Access"
     ]
   },
   "Retail": {
@@ -35,6 +49,19 @@ const segmentDetails = {
       "Standard savings account interest rates",
       "Fixed deposit schemes",
       "Basic insurance products"
+    ],
+    eligibility: [
+      "Maintain a minimum average monthly balance of ₹10,000",
+      "KYC compliant documentation",
+      "Indian residency proof",
+      "Age 18 years and above"
+    ],
+    products: [
+      "Standard Savings Account",
+      "Basic Debit & Credit Cards",
+      "Fixed Deposits",
+      "Personal Loans",
+      "Two-Wheeler & Auto Loans"
     ]
   },
   "Corporate": {
@@ -47,6 +74,19 @@ const segmentDetails = {
       "Cash management services",
       "Employee banking solutions",
       "Working capital financing"
+    ],
+    eligibility: [
+      "Registered business entity (Private/Public Ltd, LLP, Partnership)",
+      "Minimum annual turnover of ₹2 Crores",
+      "Operational for at least 2 years",
+      "Satisfactory credit history and banking relationship"
+    ],
+    products: [
+      "Corporate Current Accounts",
+      "Letter of Credit & Bank Guarantees",
+      "Business Term Loans",
+      "Point of Sale (POS) Solutions",
+      "Payroll Management Services"
     ]
   },
   "Senior Citizens": {
@@ -59,13 +99,27 @@ const segmentDetails = {
       "Doorstep banking services",
       "Specialized health insurance products",
       "Pension account facilities"
+    ],
+    eligibility: [
+      "Age 60 years and above",
+      "Valid age proof and KYC documents",
+      "Maintain a minimum average monthly balance of ₹5,000",
+      "Pension account (optional)"
+    ],
+    products: [
+      "Senior Citizen Savings Account",
+      "Special FD Schemes with Higher Interest",
+      "Senior Citizen Health Insurance",
+      "Will Advisory Services",
+      "Reverse Mortgage Loan"
     ]
   }
 };
 
 const ClientSegmentDetails: React.FC<ClientSegmentDetailsProps> = ({ 
   selectedBank,
-  segments
+  segments,
+  displayBelow = false
 }) => {
   // Get enabled segments
   const enabledSegments = segments.filter(segment => segment.enabled);
@@ -93,7 +147,7 @@ const ClientSegmentDetails: React.FC<ClientSegmentDetailsProps> = ({
   };
 
   return (
-    <Card className="bg-white rounded-lg shadow-md">
+    <Card className={`bg-white rounded-lg shadow-md ${displayBelow ? 'mt-6' : ''}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5 text-blue-600" />
@@ -135,19 +189,67 @@ const ClientSegmentDetails: React.FC<ClientSegmentDetailsProps> = ({
                 </div>
               </div>
               
-              <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-                  <BarChart4 className="h-4 w-4 text-blue-600" />
-                  Key Benefits
-                </h4>
-                <ul className="space-y-1">
-                  {details.benefits.map((benefit, index) => (
-                    <li key={index} className="flex items-center gap-2 text-sm">
-                      <ChevronRight className="h-4 w-4 text-blue-500 flex-shrink-0" />
-                      <span>{benefit}</span>
-                    </li>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                    <BarChart4 className="h-4 w-4 text-blue-600" />
+                    Key Benefits
+                  </h4>
+                  <ul className="space-y-1">
+                    {details.benefits.map((benefit, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <ChevronRight className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                        <span>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                    <UserCheck className="h-4 w-4 text-green-600" />
+                    Eligibility Criteria
+                  </h4>
+                  <ul className="space-y-1">
+                    {details.eligibility.map((criteria, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <ChevronRight className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span>{criteria}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                    <Briefcase className="h-4 w-4 text-purple-600" />
+                    Available Products
+                  </h4>
+                  <ul className="space-y-1">
+                    {details.products.map((product, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <ChevronRight className="h-4 w-4 text-purple-500 flex-shrink-0" />
+                        <span>{product}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* Additional services section */}
+              <div className="mt-5 pt-4 border-t border-blue-200">
+                <div className="flex items-center gap-2 mb-3">
+                  <HeartHandshake className="h-4 w-4 text-blue-700" />
+                  <h4 className="text-sm font-medium text-blue-700">Special Services for {segment.name}</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  {segment.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-white p-2 rounded border border-blue-100">
+                      <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                      <span className="text-xs text-blue-900">{feature}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
           );

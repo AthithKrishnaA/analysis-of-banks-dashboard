@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
@@ -42,6 +43,15 @@ const baseValues = {
   'HDFCBANK.NS': 1714.00,
   'KOTAKBANK.NS': 1910.00,
   'ICICIBANK.NS': 1267.00
+};
+
+// Bank website URLs for credit card offers and other products
+export const bankWebsites = {
+  'SBIN.NS': 'https://www.onlinesbi.sbi/',
+  'AXISBANK.NS': 'https://www.axisbank.com/',
+  'HDFCBANK.NS': 'https://www.hdfcbank.com/',
+  'KOTAKBANK.NS': 'https://www.kotak.com/',
+  'ICICIBANK.NS': 'https://www.icicibank.com/'
 };
 
 const mockNews: Record<string, BankNewsItem[]> = {
@@ -285,6 +295,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     toggleInteractiveMode, 
     simulateMarketEvent,
     interactiveMode,
-    isMarketOpen
+    isMarketOpen,
+    bankWebsite: bankWebsites[selectedBank] || 'https://www.onlinesbi.sbi/'
   };
 };

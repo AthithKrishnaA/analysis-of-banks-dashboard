@@ -6,6 +6,7 @@ import MetricsCard from '../MetricsCard';
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import ClientSegmentDetails from './ClientSegmentDetails';
+import BranchNetwork from '../BranchNetwork';
 
 interface ClientMetricsProps {
   selectedBank: string;
@@ -113,6 +114,8 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
   const toggleDetailedView = () => {
     setShowDetailedView(!showDetailedView);
   };
+
+  const hasEnabledSegments = segments.some(segment => segment.enabled);
 
   return (
     <div className="space-y-6">
@@ -231,9 +234,16 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
         </CardContent>
       </Card>
       
+      {/* Display BranchNetwork component */}
+      <BranchNetwork selectedBank={selectedBank} />
+      
       {/* Add segment details when segments are enabled */}
-      {segments.some(segment => segment.enabled) && (
-        <ClientSegmentDetails selectedBank={selectedBank} segments={segments} />
+      {hasEnabledSegments && (
+        <ClientSegmentDetails 
+          selectedBank={selectedBank} 
+          segments={segments} 
+          displayBelow={true} 
+        />
       )}
     </div>
   );
