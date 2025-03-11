@@ -18,11 +18,23 @@ import BranchNetwork from '../components/BranchNetwork';
 import CustomerSatisfaction from '../components/CustomerSatisfaction';
 import DigitalBankingMetrics from '../components/DigitalBankingMetrics';
 import PortfolioRecommendations from '../components/wealth/PortfolioRecommendations';
+import LoanCalculatorDialog from '../components/banking/LoanCalculatorDialog';
+import CardOffersDialog from '../components/banking/CardOffersDialog';
+import FDRatesDialog from '../components/banking/FDRatesDialog';
+import PriceAlertDialog from '../components/banking/PriceAlertDialog';
 import { useStockData } from '@/hooks/useStockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Newspaper, CreditCard, Calculator, Bell, BanknoteIcon, IndianRupee, ChartBar } from 'lucide-react';
+import { 
+  Newspaper, 
+  CreditCard, 
+  Calculator, 
+  Bell, 
+  BanknoteIcon, 
+  IndianRupee, 
+  ChartBar 
+} from 'lucide-react';
 
 const bankMetricsData = {
   'SBIN.NS': {
@@ -126,6 +138,12 @@ const Index = () => {
     change: string;
     changePercent: string;
   } | undefined>(undefined);
+  
+  // Dialog state for interactive banking tools
+  const [showLoanCalculator, setShowLoanCalculator] = useState(false);
+  const [showCardOffers, setShowCardOffers] = useState(false);
+  const [showFDRates, setShowFDRates] = useState(false);
+  const [showPriceAlert, setShowPriceAlert] = useState(false);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -238,25 +256,63 @@ const Index = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+              <Button 
+                variant="outline" 
+                className="p-6 h-auto flex flex-col items-center justify-center gap-3"
+                onClick={() => setShowLoanCalculator(true)}
+              >
                 <Calculator className="h-8 w-8 text-blue-600" />
                 <span>Loan Calculator</span>
               </Button>
-              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+              <Button 
+                variant="outline" 
+                className="p-6 h-auto flex flex-col items-center justify-center gap-3"
+                onClick={() => setShowCardOffers(true)}
+              >
                 <CreditCard className="h-8 w-8 text-green-600" />
                 <span>Card Offers</span>
               </Button>
-              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+              <Button 
+                variant="outline" 
+                className="p-6 h-auto flex flex-col items-center justify-center gap-3"
+                onClick={() => setShowFDRates(true)}
+              >
                 <IndianRupee className="h-8 w-8 text-amber-600" />
                 <span>FD Rates</span>
               </Button>
-              <Button variant="outline" className="p-6 h-auto flex flex-col items-center justify-center gap-3">
+              <Button 
+                variant="outline" 
+                className="p-6 h-auto flex flex-col items-center justify-center gap-3"
+                onClick={() => setShowPriceAlert(true)}
+              >
                 <Bell className="h-8 w-8 text-purple-600" />
                 <span>Price Alerts</span>
               </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* Banking tool dialogs */}
+        <LoanCalculatorDialog 
+          open={showLoanCalculator} 
+          onOpenChange={setShowLoanCalculator} 
+          selectedBank={selectedBank}
+        />
+        <CardOffersDialog 
+          open={showCardOffers} 
+          onOpenChange={setShowCardOffers} 
+          selectedBank={selectedBank}
+        />
+        <FDRatesDialog 
+          open={showFDRates} 
+          onOpenChange={setShowFDRates} 
+          selectedBank={selectedBank}
+        />
+        <PriceAlertDialog 
+          open={showPriceAlert} 
+          onOpenChange={setShowPriceAlert} 
+          selectedBank={selectedBank}
+        />
 
         {/* Recent Bank News Section */}
         <Card className="bg-white rounded-lg shadow-lg">

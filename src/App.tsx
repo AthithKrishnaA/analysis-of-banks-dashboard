@@ -13,39 +13,43 @@ import PredictiveAnalysis from "./pages/PredictiveAnalysis";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route
-                path="/"
-                element={
-                  <ProtectedRoute>
-                    <Index />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/predictive-analysis"
-                element={
-                  <ProtectedRoute>
-                    <PredictiveAnalysis />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </React.StrictMode>
-);
+function App() {
+  return (
+    <>
+      <React.StrictMode>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/auth" element={<Auth />} />
+                  <Route
+                    path="/"
+                    element={
+                      <ProtectedRoute>
+                        <Index />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/predictive-analysis"
+                    element={
+                      <ProtectedRoute>
+                        <PredictiveAnalysis />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </React.StrictMode>
+    </>
+  );
+}
 
 export default App;
