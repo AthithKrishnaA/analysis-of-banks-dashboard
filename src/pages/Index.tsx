@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -18,7 +19,6 @@ import CustomerSatisfaction from '../components/CustomerSatisfaction';
 import DigitalBankingMetrics from '../components/DigitalBankingMetrics';
 import PortfolioRecommendations from '../components/wealth/PortfolioRecommendations';
 import { useStockData } from '@/hooks/useStockData';
-import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const bankMetricsData = {
@@ -144,13 +144,7 @@ const Index = () => {
   };
 
   const metrics = bankMetricsData[selectedBank];
-  const { 
-    data, 
-    toggleInteractiveMode, 
-    simulateMarketEvent, 
-    news,
-    interactiveMode 
-  } = useStockData(selectedBank, handleSentimentUpdate);
+  const { data } = useStockData(selectedBank, handleSentimentUpdate);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
@@ -184,14 +178,6 @@ const Index = () => {
             onPriceUpdate={handlePriceUpdate}
           />
         </div>
-
-        <InteractiveBankFeatures 
-          selectedBank={selectedBank}
-          toggleInteractiveMode={toggleInteractiveMode}
-          simulateMarketEvent={simulateMarketEvent}
-          interactiveMode={interactiveMode}
-          news={news}
-        />
 
         <Tabs defaultValue="overview" className="w-full" onValueChange={(value) => setActiveTab(value)}>
           <TabsList className="grid grid-cols-4 mb-4">

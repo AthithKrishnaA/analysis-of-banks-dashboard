@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Loader2, Calendar, TrendingUp } from 'lucide-react';
+import { Loader2, Calendar, TrendingUp, Users, Building, DollarSign, CreditCard } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,16 +15,18 @@ import PortfolioPerformance from '../components/wealth/PortfolioPerformance';
 import AssetAllocation from '../components/wealth/AssetAllocation';
 import ClientMetrics from '../components/wealth/ClientMetrics';
 import { useStockData } from '../hooks/useStockData';
-import InteractiveBankFeatures from '../components/InteractiveBankFeatures';
+import NpaPredictions from '../components/predictive/NpaPredictions';
+import RevenueProjections from '../components/predictive/RevenueProjections';
+import CustomerGrowthForecast from '../components/predictive/CustomerGrowthForecast';
+import BranchExpansionPlans from '../components/predictive/BranchExpansionPlans';
 
 const PredictiveAnalysis = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const [predictionDays, setPredictionDays] = useState(90);
   const [volatilityFactor, setVolatilityFactor] = useState(1);
-  const [selectedScenario, setSelectedScenario] = useState('base');
   const { toast } = useToast();
-  const { toggleInteractiveMode, simulateMarketEvent, news, interactiveMode, isMarketOpen } = useStockData(selectedBank);
+  const { isMarketOpen } = useStockData(selectedBank);
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
@@ -36,14 +38,6 @@ const PredictiveAnalysis = () => {
         description: `ML models have generated new market predictions for ${bankId}`,
       });
     }, 2000);
-  };
-
-  const handleScenarioChange = (scenario: string) => {
-    setSelectedScenario(scenario);
-    toast({
-      title: "Scenario Changed",
-      description: `Analyzing ${scenario} case market conditions`,
-    });
   };
 
   const handleVolatilityChange = (value: number[]) => {
@@ -109,19 +103,12 @@ const PredictiveAnalysis = () => {
           </div>
         </div>
 
-        <InteractiveBankFeatures 
-          selectedBank={selectedBank} 
-          toggleInteractiveMode={toggleInteractiveMode}
-          simulateMarketEvent={simulateMarketEvent}
-          interactiveMode={interactiveMode}
-          isMarketOpen={isMarketOpen}
-          news={news}
-        />
-
         <Tabs defaultValue="market" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="market">Market Analysis</TabsTrigger>
             <TabsTrigger value="wealth">Wealth Management</TabsTrigger>
+            <TabsTrigger value="business">Business Metrics</TabsTrigger>
+            <TabsTrigger value="expansion">Future Growth</TabsTrigger>
           </TabsList>
 
           <TabsContent value="market" className="space-y-6">
@@ -155,6 +142,28 @@ const PredictiveAnalysis = () => {
               <AssetAllocation selectedBank={selectedBank} />
             </div>
             <ClientMetrics selectedBank={selectedBank} />
+            <div className="grid grid-cols-1 gap-6">
+              <RiskAssessment selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} />
+              <ConfidenceIntervals selectedBank={selectedBank} timeframe={predictionDays} volatility={volatilityFactor} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="business" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <NpaPredictions selectedBank={selectedBank} timeframe={predictionDays} />
+              <RevenueProjections selectedBank={selectedBank} timeframe={predictionDays} />
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              <FraudPredictions selectedBank={selectedBank} timeframe={predictionDays} />
+              <CompliancePredictions selectedBank={selectedBank} timeframe={predictionDays} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="expansion" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CustomerGrowthForecast selectedBank={selectedBank} timeframe={predictionDays} />
+              <BranchExpansionPlans selectedBank={selectedBank} timeframe={predictionDays} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>
