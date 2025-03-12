@@ -19,9 +19,9 @@ interface CardOffersDialogProps {
 
 const bankCards = {
   'SBIN.NS': [
-    { name: 'SBI SimplySAVE Credit Card', fee: '499', cashback: '1%', url: 'https://www.onlinesbi.sbi/personal-banking/cards/credit-card/simplysave-sbi-card' },
-    { name: 'SBI SimplyCLICK Credit Card', fee: '999', cashback: '5% on online spends', url: 'https://www.onlinesbi.sbi/personal-banking/cards/credit-card/simplyclick-sbi-card' },
-    { name: 'SBI Prime Credit Card', fee: '2,999', cashback: '2% on all spends', url: 'https://www.onlinesbi.sbi/personal-banking/cards/credit-card/prime-sbi-card' },
+    { name: 'SBI SimplySAVE Credit Card', fee: '499', cashback: '1%', url: 'https://www.onlinesbi.sbi/' },
+    { name: 'SBI SimplyCLICK Credit Card', fee: '999', cashback: '5% on online spends', url: 'https://www.onlinesbi.sbi/' },
+    { name: 'SBI Prime Credit Card', fee: '2,999', cashback: '2% on all spends', url: 'https://www.onlinesbi.sbi/' },
   ],
   'AXISBANK.NS': [
     { name: 'Axis Bank Ace Credit Card', fee: 'Zero', cashback: '5% on bill payments', url: 'https://www.axisbank.com/retail/cards/credit-card/axis-ace-credit-card' },
