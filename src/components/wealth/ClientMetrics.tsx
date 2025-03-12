@@ -235,12 +235,11 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
       </Card>
       
       {/* Display BranchNetwork component */}
-      <BranchNetwork selectedBank={selectedBank} />
+      
       
       {/* Add segment details when segments are enabled */}
       {hasEnabledSegments && (
         <ClientSegmentDetails 
-          selectedBank={selectedBank} 
           segments={segments} 
           displayBelow={true} 
         />
