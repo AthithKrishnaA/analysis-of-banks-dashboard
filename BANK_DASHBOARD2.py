@@ -1,10 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
 
-# In[1]:
-
-
-# First run this cell to import required libraries
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
@@ -101,7 +95,7 @@ class BankDashboard:
         return fig
     
     def create_performance_chart(self, df):
-        """Create performance comparison chart"""
+       
         fig = go.Figure()
         colors = ['red' if x < 0 else 'green' for x in df['change_percent']]
         fig.add_trace(go.Bar(
