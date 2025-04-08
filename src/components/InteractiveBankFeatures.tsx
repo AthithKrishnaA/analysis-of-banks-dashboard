@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard, Calendar, ExternalLink } from 'lucide-react';
+import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard, Calendar } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import LoanCalculator from './LoanCalculator';
 import CreditCardOptions from './CreditCardOptions';
@@ -20,7 +20,6 @@ interface InteractiveBankFeaturesProps {
     summary: string;
     impact: 'positive' | 'negative' | 'neutral';
     date: string;
-    source?: string;
   }>;
 }
 
@@ -44,18 +43,6 @@ const InteractiveBankFeatures = ({
 
   const handleInterestRateAlert = () => {
     setShowRateAlertForm(true);
-  };
-  
-  const handleNewsItemClick = (newsItem: any) => {
-    if (newsItem.source) {
-      window.open(newsItem.source, '_blank', 'noopener,noreferrer');
-    } else {
-      toast({
-        title: newsItem.title,
-        description: newsItem.summary,
-        duration: 3000,
-      });
-    }
   };
 
   return (
@@ -196,15 +183,14 @@ const InteractiveBankFeatures = ({
               </TableHeader>
               <TableBody>
                 {news.map((item, index) => (
-                  <TableRow 
-                    key={index} 
-                    className="cursor-pointer hover:bg-gray-50" 
-                    onClick={() => handleNewsItemClick(item)}
-                  >
-                    <TableCell className="font-medium flex items-center gap-1">
-                      {item.title}
-                      {item.source && <ExternalLink className="h-3 w-3 text-blue-500" />}
-                    </TableCell>
+                  <TableRow key={index} className="cursor-pointer hover:bg-gray-50" onClick={() => {
+                    toast({
+                      title: item.title,
+                      description: item.summary,
+                      duration: 3000,
+                    });
+                  }}>
+                    <TableCell className="font-medium">{item.title}</TableCell>
                     <TableCell>
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         item.impact === 'positive' ? 'bg-green-100 text-green-800' :
