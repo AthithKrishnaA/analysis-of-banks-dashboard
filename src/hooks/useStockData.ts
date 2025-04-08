@@ -1,14 +1,187 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
-import { StockDataPoint, BankNewsItem } from '@/types/stockTypes';
-import { checkMarketStatus, generateMockPrice } from '@/utils/marketUtils';
-import { refreshNewsIfNeeded } from '@/utils/newsUtils';
-import { BASE_VALUES, BANK_WEBSITES } from '@/utils/bankConstants';
+import { format, parse, getDay, isWithinInterval, isWeekend, addDays } from 'date-fns';
 
-export { BankNewsItem } from '@/types/stockTypes';
-export { BANK_WEBSITES } from '@/utils/bankConstants';
+interface StockDataPoint {
+  date: string;
+  price: number;
+}
+
+export interface BankNewsItem {
+  title: string;
+  summary: string;
+  impact: 'positive' | 'negative' | 'neutral';
+  date: string;
+  source: string; // URL to the news source
+}
+
+// Indian stock market hours: 9:15 AM to 3:30 PM
+const MARKET_OPEN_TIME = '09:15:00';
+const MARKET_CLOSE_TIME = '15:30:00';
+
+// Indian holidays in 2025
+const INDIAN_MARKET_HOLIDAYS_2025 = [
+  new Date(2025, 0, 1),   // New Year's Day
+  new Date(2025, 0, 26),  // Republic Day
+  new Date(2025, 2, 28),  // Holi
+  new Date(2025, 3, 18),  // Good Friday
+  new Date(2025, 3, 1),   // Eid-ul-Fitr
+  new Date(2025, 4, 1),   // Maharashtra Day
+  new Date(2025, 5, 8),   // Bakri Eid
+  new Date(2025, 7, 15),  // Independence Day
+  new Date(2025, 8, 15),  // Ganesh Chaturthi
+  new Date(2025, 9, 2),   // Gandhi Jayanti
+  new Date(2025, 9, 21),  // Diwali-Laxmi Puja
+  new Date(2025, 10, 3),  // Guru Nanak Jayanti
+  new Date(2025, 11, 25)  // Christmas
+];
+
+const baseValues = {
+  'SBIN.NS': 778.10,
+  'AXISBANK.NS': 1013.00,
+  'HDFCBANK.NS': 1714.00,
+  'KOTAKBANK.NS': 1910.00,
+  'ICICIBANK.NS': 1267.00
+};
+
+// Bank website URLs for credit card offers and other products
+export const bankWebsites = {
+  'SBIN.NS': 'https://sbi.co.in/web/sbi-in-the-news',
+  'AXISBANK.NS': 'https://www.axisbank.com/',
+  'HDFCBANK.NS': 'https://www.hdfcbank.com/',
+  'KOTAKBANK.NS': 'https://www.kotak.com/',
+  'ICICIBANK.NS': 'https://www.icicibank.com/'
+};
+
+// Generate news for each bank with today's date
+const generateLatestNews = (): Record<string, BankNewsItem[]> => {
+  const today = new Date();
+  const yesterday = addDays(today, -1);
+  const twoDaysAgo = addDays(today, -2);
+  
+  return {
+    'SBIN.NS': [
+      { 
+        title: 'SBI Announces Digital Banking Partnership', 
+        summary: 'State Bank of India forms strategic partnership with leading fintech to enhance digital banking services', 
+        impact: 'positive', 
+        date: today.toISOString(),
+        source: 'https://www.sbi.co.in/web/sbi-in-the-news/all-news'
+      },
+      { 
+        title: 'Government Initiatives Boost SBI Rural Banking', 
+        summary: 'New government initiatives help SBI expand rural banking reach by 15% in Q1', 
+        impact: 'positive', 
+        date: yesterday.toISOString(),
+        source: 'https://www.sbi.co.in/web/sbi-in-the-news/press-releases'
+      },
+      { 
+        title: 'SBI Reports Strong Q1 Growth', 
+        summary: 'State Bank of India reports 18% year-on-year profit growth in Q1 financial results', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString(),
+        source: 'https://www.sbi.co.in/web/sbi-in-the-news/latest-news'
+      }
+    ],
+    'AXISBANK.NS': [
+      { 
+        title: 'Axis Bank Introduces AI-Powered Customer Service', 
+        summary: 'New AI chatbot expected to handle 40% of customer queries, reducing wait times significantly', 
+        impact: 'positive', 
+        date: today.toISOString(),
+        source: 'https://www.axisbank.com/about-us/press-releases'
+      },
+      { 
+        title: 'Axis Bank Expands Corporate Banking Division', 
+        summary: 'Bank hires 200 new relationship managers to strengthen corporate banking segment', 
+        impact: 'positive', 
+        date: yesterday.toISOString(),
+        source: 'https://www.axisbank.com/about-us/press-releases'
+      },
+      { 
+        title: 'RBI Approves Axis Bank\'s New Digital Banking Initiative', 
+        summary: 'Regulatory approval paves way for innovative banking solutions from Axis Bank', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString(),
+        source: 'https://www.axisbank.com/about-us/press-releases'
+      }
+    ],
+    'HDFCBANK.NS': [
+      { 
+        title: 'HDFC Bank Faces Technical Glitches', 
+        summary: 'Customers report issues with mobile banking app during weekend maintenance', 
+        impact: 'negative', 
+        date: today.toISOString(),
+        source: 'https://www.hdfcbank.com/personal/resources/about-us/media-room'
+      },
+      { 
+        title: 'HDFC Bank Launches Premium Credit Card', 
+        summary: 'New metal credit card targets high-net-worth individuals with exclusive benefits', 
+        impact: 'positive', 
+        date: yesterday.toISOString(),
+        source: 'https://www.hdfcbank.com/personal/resources/about-us/media-room'
+      },
+      { 
+        title: 'HDFC Bank Opens 100 New Rural Branches', 
+        summary: 'Expansion aims to enhance financial inclusion in underserved areas', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString(),
+        source: 'https://www.hdfcbank.com/personal/resources/about-us/media-room'
+      }
+    ],
+    'KOTAKBANK.NS': [
+      { 
+        title: 'Kotak Mahindra Bank Updates Mobile Banking App', 
+        summary: 'New features include voice banking and enhanced security measures', 
+        impact: 'positive', 
+        date: today.toISOString(),
+        source: 'https://www.kotak.com/en/about-us/media.html'
+      },
+      { 
+        title: 'Kotak Bank Announces Leadership Changes', 
+        summary: 'New CTO appointment signals focus on technological innovation', 
+        impact: 'neutral', 
+        date: yesterday.toISOString(),
+        source: 'https://www.kotak.com/en/about-us/media.html'
+      },
+      { 
+        title: 'Kotak Bank Reports Lower NPAs', 
+        summary: 'Successful debt recovery strategy leads to significant reduction in non-performing assets', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString(),
+        source: 'https://www.kotak.com/en/about-us/media.html'
+      }
+    ],
+    'ICICIBANK.NS': [
+      { 
+        title: 'ICICI Bank Partners with E-commerce Platform', 
+        summary: 'Strategic partnership offers exclusive discounts and cashback for bank customers', 
+        impact: 'positive', 
+        date: today.toISOString(),
+        source: 'https://www.icicibank.com/about-us/article/news'
+      },
+      { 
+        title: 'ICICI Bank Increases Home Loan Interest Rates', 
+        summary: 'Bank raises interest rates by 25 basis points following RBI policy changes', 
+        impact: 'neutral', 
+        date: yesterday.toISOString(),
+        source: 'https://www.icicibank.com/about-us/article/news'
+      },
+      { 
+        title: 'ICICI Bank Wins Banking Excellence Award', 
+        summary: 'Bank recognized for innovation and customer service at industry awards', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString(),
+        source: 'https://www.icicibank.com/about-us/article/news'
+      }
+    ]
+  };
+};
+
+// This will store our news data and refresh daily
+let newsCache: Record<string, BankNewsItem[]> | null = null;
+let newsCacheDate: Date | null = null;
 
 export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
@@ -18,10 +191,57 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const { toast } = useToast();
 
-  const checkAndUpdateMarketStatus = () => {
-    const marketStatus = checkMarketStatus();
-    setIsMarketOpen(marketStatus);
-    return marketStatus;
+  // Check if we need to refresh the news cache
+  const refreshNewsIfNeeded = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (!newsCache || !newsCacheDate || newsCacheDate.getTime() !== today.getTime()) {
+      console.log("Refreshing news cache for the day:", today);
+      newsCache = generateLatestNews();
+      newsCacheDate = today;
+    }
+    
+    return newsCache;
+  };
+
+  const checkMarketStatus = () => {
+    const now = new Date();
+    const currentDay = getDay(now);
+    
+    if (isWeekend(now)) {
+      setIsMarketOpen(false);
+      return false;
+    }
+    
+    const isHoliday = INDIAN_MARKET_HOLIDAYS_2025.some(holiday => 
+      holiday.getDate() === now.getDate() && 
+      holiday.getMonth() === now.getMonth() && 
+      holiday.getFullYear() === now.getFullYear()
+    );
+    
+    if (isHoliday) {
+      setIsMarketOpen(false);
+      return false;
+    }
+    
+    const currentTimeStr = format(now, 'HH:mm:ss');
+    const openTime = parse(MARKET_OPEN_TIME, 'HH:mm:ss', new Date());
+    const closeTime = parse(MARKET_CLOSE_TIME, 'HH:mm:ss', new Date());
+    
+    const isWithinTradingHours = isWithinInterval(
+      parse(currentTimeStr, 'HH:mm:ss', new Date()),
+      { start: openTime, end: closeTime }
+    );
+    
+    setIsMarketOpen(isWithinTradingHours);
+    return isWithinTradingHours;
+  };
+
+  const generateMockPrice = (basePrice: number) => {
+    const volatility = 0.002; // 0.2% volatility
+    const change = basePrice * volatility * (Math.random() - 0.5);
+    return basePrice + change;
   };
 
   const toggleInteractiveMode = () => {
@@ -43,7 +263,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
         description: "Cannot simulate market events when the market is closed.",
         duration: 3000,
       });
-      return { price: BASE_VALUES[selectedBank], description: "Market is closed" };
+      return { price: baseValues[selectedBank], description: "Market is closed" };
     }
     
     const eventTypes = ['positive', 'negative', 'neutral'];
@@ -67,7 +287,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
         break;
     }
     
-    const basePrice = BASE_VALUES[selectedBank];
+    const basePrice = baseValues[selectedBank];
     const newPrice = basePrice * multiplier;
     
     setData(prevData => {
@@ -89,13 +309,13 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
 
   const generateMockData = () => {
     try {
-      if (!checkAndUpdateMarketStatus()) {
+      if (!checkMarketStatus()) {
         console.log('Market is closed. Not generating new data.');
         return;
       }
       
       console.log('Generating mock data for:', selectedBank);
-      const basePrice = BASE_VALUES[selectedBank];
+      const basePrice = baseValues[selectedBank];
       
       const newPrice = generateMockPrice(basePrice);
       const timestamp = new Date().toLocaleTimeString();
@@ -134,7 +354,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   };
 
   useEffect(() => {
-    const initialMarketStatus = checkAndUpdateMarketStatus();
+    const initialMarketStatus = checkMarketStatus();
     
     if (!initialMarketStatus) {
       toast({
@@ -145,7 +365,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     }
     
     const marketStatusInterval = setInterval(() => {
-      checkAndUpdateMarketStatus();
+      checkMarketStatus();
     }, 60000);
     
     if (selectedBank) {
@@ -156,7 +376,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       const latestNews = refreshNewsIfNeeded();
       setNews(latestNews[selectedBank] || []);
       
-      const basePrice = BASE_VALUES[selectedBank];
+      const basePrice = baseValues[selectedBank];
       setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
       
       let dataInterval: NodeJS.Timeout | null = null;
@@ -214,7 +434,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     simulateMarketEvent,
     interactiveMode,
     isMarketOpen,
-    bankWebsite: BANK_WEBSITES[selectedBank] || 'https://sbi.co.in/web/sbi-in-the-news',
+    bankWebsite: bankWebsites[selectedBank] || 'https://www.onlinesbi.sbi/',
     toast
   };
 };
