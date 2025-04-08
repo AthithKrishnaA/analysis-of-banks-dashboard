@@ -95,7 +95,7 @@ const generateLatestNews = (): Record<string, BankNewsItem[]> => {
         date: yesterday.toISOString() 
       },
       { 
-        title: 'RBI Approves Axis Bank's New Digital Banking Initiative', 
+        title: 'RBI Approves Axis Bank\'s New Digital Banking Initiative', 
         summary: 'Regulatory approval paves way for innovative banking solutions from Axis Bank', 
         impact: 'positive', 
         date: twoDaysAgo.toISOString() 
