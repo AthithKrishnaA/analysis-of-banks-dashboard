@@ -242,6 +242,7 @@ const ClientMetrics = ({ selectedBank }: ClientMetricsProps) => {
         <ClientSegmentDetails 
           segments={segments} 
           displayBelow={true} 
+          selectedBank={selectedBank}
         />
       )}
     </div>
