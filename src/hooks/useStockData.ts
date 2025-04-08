@@ -47,7 +47,7 @@ const baseValues = {
 
 // Bank website URLs for credit card offers and other products
 export const bankWebsites = {
-  'SBIN.NS': 'https://www.onlinesbi.sbi/',
+  'SBIN.NS': 'https://sbi.co.in/web/sbi-in-the-news',
   'AXISBANK.NS': 'https://www.axisbank.com/',
   'HDFCBANK.NS': 'https://www.hdfcbank.com/',
   'KOTAKBANK.NS': 'https://www.kotak.com/',
