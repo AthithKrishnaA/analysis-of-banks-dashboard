@@ -1,8 +1,5 @@
-interface SentimentResult {
-  sentiment: string;
-  emoji: string;
-  color: string;
-}
+
+import { SentimentResult } from '@/types/stockTypes';
 
 export const analyzeSentiment = (priceChanges: number[]): SentimentResult => {
   const averageChange = priceChanges.reduce((sum, change) => sum + change, 0) / priceChanges.length;
