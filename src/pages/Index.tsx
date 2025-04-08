@@ -37,7 +37,8 @@ import {
   Calendar,
   ArrowUp,
   ArrowDown,
-  Minus
+  Minus,
+  ExternalLink
 } from 'lucide-react';
 
 const bankMetricsData = {
@@ -167,8 +168,20 @@ const Index = () => {
     });
   };
 
+  const handleNewsItemClick = (newsItem: BankNewsItem) => {
+    if (newsItem.source) {
+      window.open(newsItem.source, '_blank', 'noopener,noreferrer');
+    } else {
+      toast({
+        title: newsItem.title,
+        description: newsItem.summary,
+        duration: 3000,
+      });
+    }
+  };
+
   const metrics = bankMetricsData[selectedBank];
-  const { data, news } = useStockData(selectedBank, handleSentimentUpdate);
+  const { data, news, toast } = useStockData(selectedBank, handleSentimentUpdate);
 
   const formatNewsDate = (dateString: string) => {
     try {
@@ -315,9 +328,16 @@ const Index = () => {
             <div className="space-y-4">
               {news && news.length > 0 ? (
                 news.map((item: BankNewsItem, index: number) => (
-                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <div 
+                    key={index} 
+                    className="p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => handleNewsItemClick(item)}
+                  >
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium text-lg">{item.title}</h3>
+                      <h3 className="font-medium text-lg flex items-center gap-2">
+                        {item.title}
+                        <ExternalLink className="h-4 w-4 text-blue-500" />
+                      </h3>
                       <div className="flex items-center gap-2">
                         <span 
                           className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
@@ -335,6 +355,10 @@ const Index = () => {
                       </div>
                     </div>
                     <p className="text-sm text-gray-700 mt-2">{item.summary}</p>
+                    <div className="mt-2 text-xs text-blue-600 flex items-center gap-1">
+                      <span>Visit source</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </div>
                   </div>
                 ))
               ) : (
