@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
@@ -435,6 +434,7 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     simulateMarketEvent,
     interactiveMode,
     isMarketOpen,
-    bankWebsite: bankWebsites[selectedBank] || 'https://www.onlinesbi.sbi/'
+    bankWebsite: bankWebsites[selectedBank] || 'https://www.onlinesbi.sbi/',
+    toast
   };
 };

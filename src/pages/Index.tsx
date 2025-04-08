@@ -168,6 +168,8 @@ const Index = () => {
     });
   };
 
+  const { data, news, toast } = useStockData(selectedBank, handleSentimentUpdate);
+
   const handleNewsItemClick = (newsItem: BankNewsItem) => {
     if (newsItem.source) {
       window.open(newsItem.source, '_blank', 'noopener,noreferrer');
@@ -181,8 +183,6 @@ const Index = () => {
   };
 
   const metrics = bankMetricsData[selectedBank];
-  const { data, news, toast } = useStockData(selectedBank, handleSentimentUpdate);
-
   const formatNewsDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
