@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
@@ -22,10 +21,11 @@ import LoanCalculatorDialog from '../components/banking/LoanCalculatorDialog';
 import CardOffersDialog from '../components/banking/CardOffersDialog';
 import FDRatesDialog from '../components/banking/FDRatesDialog';
 import PriceAlertDialog from '../components/banking/PriceAlertDialog';
-import { useStockData } from '@/hooks/useStockData';
+import { useStockData, BankNewsItem } from '@/hooks/useStockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { format } from 'date-fns';
 import { 
   Newspaper, 
   CreditCard, 
@@ -33,7 +33,11 @@ import {
   Bell, 
   BanknoteIcon, 
   IndianRupee, 
-  ChartBar 
+  ChartBar,
+  Calendar,
+  ArrowUp,
+  ArrowDown,
+  Minus
 } from 'lucide-react';
 
 const bankMetricsData = {
@@ -139,7 +143,6 @@ const Index = () => {
     changePercent: string;
   } | undefined>(undefined);
   
-  // Dialog state for interactive banking tools
   const [showLoanCalculator, setShowLoanCalculator] = useState(false);
   const [showCardOffers, setShowCardOffers] = useState(false);
   const [showFDRates, setShowFDRates] = useState(false);
@@ -147,7 +150,7 @@ const Index = () => {
 
   const handleBankChange = (bankId: string) => {
     setSelectedBank(bankId);
-    setLivePriceData(undefined); // Reset price data when bank changes
+    setLivePriceData(undefined);
     console.log('Selected bank changed:', bankId);
   };
 
@@ -167,51 +170,36 @@ const Index = () => {
   const metrics = bankMetricsData[selectedBank];
   const { data, news } = useStockData(selectedBank, handleSentimentUpdate);
 
-  // Bank News Data
-  const bankNews = [
-    {
-      bank: 'SBIN.NS',
-      news: [
-        { title: 'SBI Reports 20% Growth in Q3 Profits', date: '2023-10-15', impact: 'positive' },
-        { title: 'SBI Launches New Digital Banking Platform', date: '2023-10-10', impact: 'positive' },
-        { title: 'SBI Increases Interest Rates on Fixed Deposits', date: '2023-10-05', impact: 'neutral' },
-      ]
-    },
-    {
-      bank: 'HDFCBANK.NS',
-      news: [
-        { title: 'HDFC Bank Completes Merger with HDFC Ltd', date: '2023-10-18', impact: 'positive' },
-        { title: 'HDFC Bank Expands Rural Banking Initiative', date: '2023-10-12', impact: 'positive' },
-        { title: 'HDFC Bank Named "Best Bank" in Asia', date: '2023-10-07', impact: 'positive' },
-      ]
-    },
-    {
-      bank: 'ICICIBANK.NS',
-      news: [
-        { title: 'ICICI Bank Launches AI-Powered Customer Service', date: '2023-10-17', impact: 'positive' },
-        { title: 'ICICI Bank Reports Strong Loan Growth', date: '2023-10-11', impact: 'positive' },
-        { title: 'ICICI Bank Revamps Mobile Banking App', date: '2023-10-06', impact: 'neutral' },
-      ]
-    },
-    {
-      bank: 'AXISBANK.NS',
-      news: [
-        { title: 'Axis Bank Partners with Fintech Startups', date: '2023-10-16', impact: 'positive' },
-        { title: 'Axis Bank Expands Wealth Management Services', date: '2023-10-09', impact: 'positive' },
-        { title: 'Axis Bank Announces Leadership Change', date: '2023-10-04', impact: 'neutral' },
-      ]
-    },
-    {
-      bank: 'KOTAKBANK.NS',
-      news: [
-        { title: 'Kotak Bank Launches New Credit Card Offerings', date: '2023-10-19', impact: 'positive' },
-        { title: 'Kotak Bank Invests in Digital Transformation', date: '2023-10-13', impact: 'positive' },
-        { title: 'Kotak Bank Opens 100 New Branches', date: '2023-10-08', impact: 'positive' },
-      ]
-    },
-  ];
+  const formatNewsDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const newsDate = new Date(date);
+      newsDate.setHours(0, 0, 0, 0);
+      
+      if (newsDate.getTime() === today.getTime()) {
+        return 'Today';
+      } else {
+        return format(date, 'dd MMM yyyy');
+      }
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return dateString;
+    }
+  };
 
-  const currentBankNews = bankNews.find(item => item.bank === selectedBank)?.news || [];
+  const getImpactIcon = (impact: string) => {
+    switch (impact) {
+      case 'positive':
+        return <ArrowUp className="h-4 w-4 text-green-600" />;
+      case 'negative':
+        return <ArrowDown className="h-4 w-4 text-red-600" />;
+      default:
+        return <Minus className="h-4 w-4 text-gray-600" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
@@ -246,7 +234,6 @@ const Index = () => {
           />
         </div>
 
-        {/* Interactive Banking Tools Section */}
         <Card className="bg-white rounded-lg shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -292,7 +279,6 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Banking tool dialogs */}
         <LoanCalculatorDialog 
           open={showLoanCalculator} 
           onOpenChange={setShowLoanCalculator} 
@@ -314,33 +300,48 @@ const Index = () => {
           selectedBank={selectedBank}
         />
 
-        {/* Recent Bank News Section */}
         <Card className="bg-white rounded-lg shadow-lg">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-blue-500" />
-              Recent Bank News
+              Latest Bank News
             </CardTitle>
+            <div className="text-xs text-gray-500 flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>Updated daily</span>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {currentBankNews.map((item, index) => (
-                <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{item.title}</h3>
-                    <span 
-                      className={`text-xs px-2 py-1 rounded-full ${
-                        item.impact === 'positive' ? 'bg-green-100 text-green-800' : 
-                        item.impact === 'negative' ? 'bg-red-100 text-red-800' : 
-                        'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {item.impact}
-                    </span>
+              {news && news.length > 0 ? (
+                news.map((item: BankNewsItem, index: number) => (
+                  <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-lg">{item.title}</h3>
+                      <div className="flex items-center gap-2">
+                        <span 
+                          className={`text-xs px-2 py-1 rounded-full flex items-center gap-1 ${
+                            item.impact === 'positive' ? 'bg-green-100 text-green-800' : 
+                            item.impact === 'negative' ? 'bg-red-100 text-red-800' : 
+                            'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {getImpactIcon(item.impact)}
+                          {item.impact}
+                        </span>
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          {formatNewsDate(item.date)}
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-700 mt-2">{item.summary}</p>
                   </div>
-                  <p className="text-sm text-gray-500 mt-1">{item.date}</p>
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No recent news available for this bank
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>

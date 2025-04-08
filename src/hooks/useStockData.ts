@@ -2,14 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { analyzeSentiment } from '@/utils/sentimentAnalysis';
-import { format, parse, getDay, isWithinInterval, isWeekend } from 'date-fns';
+import { format, parse, getDay, isWithinInterval, isWeekend, addDays } from 'date-fns';
 
 interface StockDataPoint {
   date: string;
   price: number;
 }
 
-interface BankNewsItem {
+export interface BankNewsItem {
   title: string;
   summary: string;
   impact: 'positive' | 'negative' | 'neutral';
@@ -54,28 +54,119 @@ export const bankWebsites = {
   'ICICIBANK.NS': 'https://www.icicibank.com/'
 };
 
-const mockNews: Record<string, BankNewsItem[]> = {
-  'SBIN.NS': [
-    { title: 'SBI Announces New Digital Banking Initiative', summary: 'State Bank of India launches new digital banking platform with enhanced security features', impact: 'positive', date: new Date().toISOString() },
-    { title: 'Government Increases Stake in SBI', summary: 'Indian government increases stake in SBI by 2% through open market operations', impact: 'neutral', date: new Date().toISOString() }
-  ],
-  'AXISBANK.NS': [
-    { title: 'Axis Bank Reports Strong Q2 Results', summary: 'Axis Bank exceeds analyst expectations with 22% profit growth in Q2', impact: 'positive', date: new Date().toISOString() },
-    { title: 'New Leadership at Axis Bank', summary: 'Axis Bank appoints new CTO to accelerate digital transformation', impact: 'positive', date: new Date().toISOString() }
-  ],
-  'HDFCBANK.NS': [
-    { title: 'HDFC Bank Expands Rural Presence', summary: 'HDFC Bank opens 500 new branches in rural areas to boost financial inclusion', impact: 'positive', date: new Date().toISOString() },
-    { title: 'HDFC Bank Faces Regulatory Scrutiny', summary: 'RBI examines HDFC Bank\'s IT infrastructure after recent outages', impact: 'negative', date: new Date().toISOString() }
-  ],
-  'KOTAKBANK.NS': [
-    { title: 'Kotak Mahindra Bank Launches New Credit Card', summary: 'New premium credit card offers enhanced rewards for high-value customers', impact: 'positive', date: new Date().toISOString() },
-    { title: 'Leadership Change at Kotak Bank', summary: 'Long-serving executive announces retirement from Kotak Bank board', impact: 'neutral', date: new Date().toISOString() }
-  ],
-  'ICICIBANK.NS': [
-    { title: 'ICICI Bank Partners with Fintech Startup', summary: 'Strategic partnership aims to enhance digital lending capabilities', impact: 'positive', date: new Date().toISOString() },
-    { title: 'ICICI Bank Increases Interest Rates', summary: 'Bank increases fixed deposit rates by 25 basis points', impact: 'neutral', date: new Date().toISOString() }
-  ]
+// Generate news for each bank with today's date
+const generateLatestNews = (): Record<string, BankNewsItem[]> => {
+  const today = new Date();
+  const yesterday = addDays(today, -1);
+  const twoDaysAgo = addDays(today, -2);
+  
+  return {
+    'SBIN.NS': [
+      { 
+        title: 'SBI Announces Digital Banking Partnership', 
+        summary: 'State Bank of India forms strategic partnership with leading fintech to enhance digital banking services', 
+        impact: 'positive', 
+        date: today.toISOString() 
+      },
+      { 
+        title: 'Government Initiatives Boost SBI Rural Banking', 
+        summary: 'New government initiatives help SBI expand rural banking reach by 15% in Q1', 
+        impact: 'positive', 
+        date: yesterday.toISOString() 
+      },
+      { 
+        title: 'SBI Reports Strong Q1 Growth', 
+        summary: 'State Bank of India reports 18% year-on-year profit growth in Q1 financial results', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString() 
+      }
+    ],
+    'AXISBANK.NS': [
+      { 
+        title: 'Axis Bank Introduces AI-Powered Customer Service', 
+        summary: 'New AI chatbot expected to handle 40% of customer queries, reducing wait times significantly', 
+        impact: 'positive', 
+        date: today.toISOString() 
+      },
+      { 
+        title: 'Axis Bank Expands Corporate Banking Division', 
+        summary: 'Bank hires 200 new relationship managers to strengthen corporate banking segment', 
+        impact: 'positive', 
+        date: yesterday.toISOString() 
+      },
+      { 
+        title: 'RBI Approves Axis Bank's New Digital Banking Initiative', 
+        summary: 'Regulatory approval paves way for innovative banking solutions from Axis Bank', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString() 
+      }
+    ],
+    'HDFCBANK.NS': [
+      { 
+        title: 'HDFC Bank Faces Technical Glitches', 
+        summary: 'Customers report issues with mobile banking app during weekend maintenance', 
+        impact: 'negative', 
+        date: today.toISOString() 
+      },
+      { 
+        title: 'HDFC Bank Launches Premium Credit Card', 
+        summary: 'New metal credit card targets high-net-worth individuals with exclusive benefits', 
+        impact: 'positive', 
+        date: yesterday.toISOString() 
+      },
+      { 
+        title: 'HDFC Bank Opens 100 New Rural Branches', 
+        summary: 'Expansion aims to enhance financial inclusion in underserved areas', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString() 
+      }
+    ],
+    'KOTAKBANK.NS': [
+      { 
+        title: 'Kotak Mahindra Bank Updates Mobile Banking App', 
+        summary: 'New features include voice banking and enhanced security measures', 
+        impact: 'positive', 
+        date: today.toISOString() 
+      },
+      { 
+        title: 'Kotak Bank Announces Leadership Changes', 
+        summary: 'New CTO appointment signals focus on technological innovation', 
+        impact: 'neutral', 
+        date: yesterday.toISOString() 
+      },
+      { 
+        title: 'Kotak Bank Reports Lower NPAs', 
+        summary: 'Successful debt recovery strategy leads to significant reduction in non-performing assets', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString() 
+      }
+    ],
+    'ICICIBANK.NS': [
+      { 
+        title: 'ICICI Bank Partners with E-commerce Platform', 
+        summary: 'Strategic partnership offers exclusive discounts and cashback for bank customers', 
+        impact: 'positive', 
+        date: today.toISOString() 
+      },
+      { 
+        title: 'ICICI Bank Increases Home Loan Interest Rates', 
+        summary: 'Bank raises interest rates by 25 basis points following RBI policy changes', 
+        impact: 'neutral', 
+        date: yesterday.toISOString() 
+      },
+      { 
+        title: 'ICICI Bank Wins Banking Excellence Award', 
+        summary: 'Bank recognized for innovation and customer service at industry awards', 
+        impact: 'positive', 
+        date: twoDaysAgo.toISOString() 
+      }
+    ]
+  };
 };
+
+// This will store our news data and refresh daily
+let newsCache: Record<string, BankNewsItem[]> | null = null;
+let newsCacheDate: Date | null = null;
 
 export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentiment: any, priceChanges: number[]) => void) => {
   const [data, setData] = useState<StockDataPoint[]>([]);
@@ -84,6 +175,20 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
   const [interactiveMode, setInteractiveMode] = useState(false);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const { toast } = useToast();
+
+  // Check if we need to refresh the news cache
+  const refreshNewsIfNeeded = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (!newsCache || !newsCacheDate || newsCacheDate.getTime() !== today.getTime()) {
+      console.log("Refreshing news cache for the day:", today);
+      newsCache = generateLatestNews();
+      newsCacheDate = today;
+    }
+    
+    return newsCache;
+  };
 
   const checkMarketStatus = () => {
     const now = new Date();
@@ -251,7 +356,10 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
     if (selectedBank) {
       setData([]);
       setPriceChanges([]);
-      setNews(mockNews[selectedBank] || []);
+      
+      // Get fresh news when the selected bank changes
+      const latestNews = refreshNewsIfNeeded();
+      setNews(latestNews[selectedBank] || []);
       
       const basePrice = baseValues[selectedBank];
       setData([{ date: new Date().toLocaleTimeString(), price: basePrice }]);
@@ -270,6 +378,21 @@ export const useStockData = (selectedBank: string, onSentimentUpdate?: (sentimen
       };
     }
   }, [selectedBank, interactiveMode]);
+  
+  // Add a separate effect for daily news refresh
+  useEffect(() => {
+    // Set up a timer to check for news updates every hour
+    const newsRefreshInterval = setInterval(() => {
+      if (selectedBank) {
+        const latestNews = refreshNewsIfNeeded();
+        setNews(latestNews[selectedBank] || []);
+        
+        console.log("Checked for news updates for:", selectedBank);
+      }
+    }, 3600000); // Check every hour
+    
+    return () => clearInterval(newsRefreshInterval);
+  }, [selectedBank]);
   
   useEffect(() => {
     if (isMarketOpen && selectedBank) {
