@@ -16,9 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 
 // Define the available user types
 const userTypes = [
@@ -35,12 +32,8 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const [otpValue, setOtpValue] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  const otpForm = useForm();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -91,57 +84,11 @@ const Auth = () => {
     }
   };
 
-  const verifyOtp = async () => {
-    setLoading(true);
-    
-    if (otpValue.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter a valid 6-digit OTP code.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-    
-    try {
-      // Verify the OTP
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: otpValue,
-        type: 'signup',
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        setSelectedUserId(data.user.id);
-        // Show the user type selection modal
-        setShowOtpVerification(false);
-        setShowUserTypeModal(true);
-
-        toast({
-          title: "Email Verified",
-          description: "Your email has been verified successfully.",
-        });
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      // Request OTP for signup
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -149,18 +96,21 @@ const Auth = () => {
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: window.location.origin,
         },
       });
 
       if (error) throw error;
 
-      // Show OTP verification dialog
-      setShowOtpVerification(true);
+      // Store the user ID for the next step
+      if (data.user) {
+        setSelectedUserId(data.user.id);
+        // Show the user type selection modal
+        setShowUserTypeModal(true);
+      }
 
       toast({
-        title: "OTP Sent",
-        description: "We've sent a verification code to your email. Please check your inbox.",
+        title: "Success!",
+        description: "Successfully signed up! Please select your user type.",
       });
     } catch (error: any) {
       toast({
@@ -330,45 +280,6 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* OTP Verification Dialog */}
-      <Dialog open={showOtpVerification} onOpenChange={setShowOtpVerification}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Email Verification</DialogTitle>
-            <DialogDescription>
-              Enter the 6-digit verification code sent to your email
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex flex-col items-center space-y-6 py-4">
-            <div className="flex flex-col space-y-2 w-full items-center">
-              <InputOTP 
-                maxLength={6} 
-                value={otpValue} 
-                onChange={setOtpValue}
-                render={({ slots }) => (
-                  <InputOTPGroup>
-                    {slots.map((slot, index) => (
-                      <InputOTPSlot key={index} {...slot} index={index} />
-                    ))}
-                  </InputOTPGroup>
-                )}
-              />
-              <p className="text-sm text-gray-500 mt-2">Didn't receive the code? Check your spam folder.</p>
-            </div>
-            
-            <Button 
-              onClick={verifyOtp} 
-              className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white"
-              disabled={loading || otpValue.length !== 6}
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Verify Email
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* User Type Selection Modal */}
       <Dialog open={showUserTypeModal} onOpenChange={setShowUserTypeModal}>

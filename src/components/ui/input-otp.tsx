@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
 import { Dot } from "lucide-react"
@@ -29,21 +28,12 @@ const InputOTPGroup = React.forwardRef<
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
 
-type InputOTPSlotProps = React.ComponentPropsWithoutRef<"div"> & { index: number }
-
 const InputOTPSlot = React.forwardRef<
   React.ElementRef<"div">,
-  InputOTPSlotProps
+  React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  
-  // Add a check to ensure slots exist and the index is valid
-  const slot = inputOTPContext?.slots?.[index] || {}
-  const { char, hasFakeCaret, isActive } = slot as { 
-    char?: string; 
-    hasFakeCaret?: boolean; 
-    isActive?: boolean 
-  }
+  const { char, hasFakeCaret, isActive } = inputOTPContext.slots[index]
 
   return (
     <div
@@ -76,5 +66,4 @@ const InputOTPSeparator = React.forwardRef<
 ))
 InputOTPSeparator.displayName = "InputOTPSeparator"
 
-export type { OTPInput }
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
