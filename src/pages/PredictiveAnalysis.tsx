@@ -1,26 +1,24 @@
-
-import React, { useState } from 'react';
-import { Loader2, Calendar, TrendingUp, Users, Building, DollarSign, CreditCard } from 'lucide-react';
-import { useToast } from "@/components/ui/use-toast";
-import { Slider } from "@/components/ui/slider";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BankSelector from '../components/BankSelector';
-import BankPricePredictions from '../components/predictive/BankPricePredictions';
-import VolumeChart from '../components/predictive/VolumeChart';
-import ConfidenceIntervals from '../components/predictive/ConfidenceIntervals';
-import RiskAssessment from '../components/predictive/RiskAssessment';
-import FraudPredictions from '../components/predictive/FraudPredictions';
-import CompliancePredictions from '../components/predictive/CompliancePredictions';
-import PortfolioPerformance from '../components/wealth/PortfolioPerformance';
-import AssetAllocation from '../components/wealth/AssetAllocation';
-import ClientMetrics from '../components/wealth/ClientMetrics';
-import { useStockData } from '../hooks/useStockData';
-import NpaPredictions from '../components/predictive/NpaPredictions';
-import RevenueProjections from '../components/predictive/RevenueProjections';
-import CustomerGrowthForecast from '../components/predictive/CustomerGrowthForecast';
-import BranchExpansionPlans from '../components/predictive/BranchExpansionPlans';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, TrendingUp, DollarSign, PieChart, Building, UserCheck, Shield, AlertTriangle, GanttChart, FileChart } from 'lucide-react';
+
+import BankPricePredictions from '@/components/predictive/BankPricePredictions';
+import RevenueProjections from '@/components/predictive/RevenueProjections';
+import CustomerGrowthForecast from '@/components/predictive/CustomerGrowthForecast';
+import BranchExpansionPlans from '@/components/predictive/BranchExpansionPlans';
+import NpaPredictions from '@/components/predictive/NpaPredictions';
+import FraudPredictions from '@/components/predictive/FraudPredictions';
+import CompliancePredictions from '@/components/predictive/CompliancePredictions';
+import RiskAssessment from '@/components/predictive/RiskAssessment';
+import ConfidenceIntervals from '@/components/predictive/ConfidenceIntervals';
+import SignOutButton from '../components/SignOutButton';
 
 const PredictiveAnalysis = () => {
+  const navigate = useNavigate();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [selectedBank, setSelectedBank] = useState('SBIN.NS');
   const [predictionDays, setPredictionDays] = useState(90);
@@ -166,6 +164,8 @@ const PredictiveAnalysis = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        <SignOutButton />
       </div>
     </div>
   );

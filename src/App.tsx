@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -10,6 +11,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import PredictiveAnalysis from "./pages/PredictiveAnalysis";
+import SignOut from "./pages/SignOut";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,14 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <PredictiveAnalysis />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/sign-out"
+                    element={
+                      <ProtectedRoute>
+                        <SignOut />
                       </ProtectedRoute>
                     }
                   />

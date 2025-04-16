@@ -21,6 +21,7 @@ import LoanCalculatorDialog from '../components/banking/LoanCalculatorDialog';
 import CardOffersDialog from '../components/banking/CardOffersDialog';
 import FDRatesDialog from '../components/banking/FDRatesDialog';
 import PriceAlertDialog from '../components/banking/PriceAlertDialog';
+import SignOutButton from '../components/SignOutButton';
 import { useStockData, BankNewsItem } from '@/hooks/useStockData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -408,6 +409,8 @@ const Index = () => {
             </div>
           </TabsContent>
         </Tabs>
+
+        <SignOutButton />
       </div>
     </div>
   );
