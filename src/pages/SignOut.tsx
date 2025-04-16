@@ -12,11 +12,11 @@ const SignOut = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/auth');
+    navigate('/auth');  // Explicitly navigate to the authentication page
   };
 
   const handleCancel = () => {
-    navigate('/');
+    navigate('/');  // Return to the main dashboard if user cancels
   };
 
   return (
