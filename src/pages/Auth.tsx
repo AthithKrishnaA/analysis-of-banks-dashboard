@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +21,6 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 
-// Define the available user types
 const userTypes = [
   { id: 'student', label: 'Student', icon: School, description: 'Access student-focused banking products and educational resources' },
   { id: 'investor', label: 'Investor', icon: TrendingUp, description: 'Track investments and access advanced market analysis tools' },
@@ -43,7 +41,6 @@ const Auth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate('/');
@@ -56,7 +53,6 @@ const Auth = () => {
     
     setLoading(true);
     try {
-      // Update the user's metadata with the selected user type
       const { error } = await supabase.auth.updateUser({
         data: { user_type: userType }
       });
@@ -68,10 +64,8 @@ const Auth = () => {
         description: `Your profile has been set up as a ${userType.replace('_', ' ')}.`,
       });
 
-      // Close the modal and redirect to login
       setShowUserTypeModal(false);
       
-      // After updating the user type, sign in the user automatically
       const { error: signInError } = await supabase.auth.signInWithOtp({
         email,
       });
@@ -95,7 +89,6 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      // Send OTP code via email for verification
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -135,7 +128,6 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // If verification successful, proceed with the account setup
       if (data.user) {
         setSelectedUserId(data.user.id);
         setShowUserTypeModal(true);
@@ -161,16 +153,17 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
+        password,
       });
 
       if (error) throw error;
 
-      setShowOTPInput(true);
+      navigate('/');
       toast({
-        title: "Verification Code Sent",
-        description: "Please check your email for the verification code to sign in.",
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
       });
     } catch (error: any) {
       toast({
@@ -208,59 +201,48 @@ const Auth = () => {
               </TabsList>
               
               <TabsContent value="signin">
-                {!showOTPInput ? (
-                  <form onSubmit={handleSignIn} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input
-                          id="email"
-                          type="email"
-                          placeholder="name@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="pl-10"
-                          required
-                        />
-                      </div>
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="name@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                      disabled={loading}
-                    >
-                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Send Verification Code
-                    </Button>
-                  </form>
-                ) : (
-                  <div className="space-y-4">
-                    <Label>Enter verification code sent to {email}</Label>
-                    <InputOTP
-                      value={otp}
-                      onChange={(value) => setOTP(value)}
-                      maxLength={6}
-                      render={({ slots }) => (
-                        <InputOTPGroup className="gap-2">
-                          {slots.map((slot, i) => (
-                            <InputOTPSlot key={i} {...slot} />
-                          ))}
-                        </InputOTPGroup>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={handleOTPVerification}
-                      className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                      disabled={loading || otp.length !== 6}
-                    >
-                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Verify Code
-                    </Button>
                   </div>
-                )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                    disabled={loading}
+                  >
+                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Sign In
+                  </Button>
+                </form>
               </TabsContent>
               
               <TabsContent value="signup">
@@ -316,8 +298,8 @@ const Auth = () => {
                       maxLength={6}
                       render={({ slots }) => (
                         <InputOTPGroup className="gap-2">
-                          {slots.map((slot, i) => (
-                            <InputOTPSlot key={i} {...slot} />
+                          {slots.map((slot, idx) => (
+                            <InputOTPSlot key={idx} {...slot} index={idx} />
                           ))}
                         </InputOTPGroup>
                       )}
@@ -339,7 +321,6 @@ const Auth = () => {
         </Card>
       </div>
 
-      {/* User Type Selection Modal */}
       <Dialog open={showUserTypeModal} onOpenChange={setShowUserTypeModal}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
