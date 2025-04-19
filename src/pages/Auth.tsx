@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +32,7 @@ const userTypes = [
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
@@ -65,13 +67,6 @@ const Auth = () => {
       });
 
       setShowUserTypeModal(false);
-      
-      const { error: signInError } = await supabase.auth.signInWithOtp({
-        email,
-      });
-
-      if (signInError) throw signInError;
-      
       navigate('/');
     } catch (error: any) {
       toast({
@@ -86,20 +81,41 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords don't match. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signInWithOtp({
+      // First create the user with email and password
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
+        password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             full_name: fullName,
           },
         },
       });
 
-      if (error) throw error;
+      if (signUpError) throw signUpError;
+
+      // Then send a one-time password to the email for verification
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+        }
+      });
+
+      if (otpError) throw otpError;
 
       setShowOTPInput(true);
       toast({
@@ -280,6 +296,38 @@ const Auth = () => {
                       </div>
                     </div>
                     
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="signup-password"
+                          type="password"
+                          placeholder="Create a password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          placeholder="Confirm your password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
                     <Button 
                       type="submit" 
                       className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
@@ -294,7 +342,7 @@ const Auth = () => {
                     <Label>Enter verification code sent to {email}</Label>
                     <InputOTP
                       value={otp}
-                      onChange={(value) => setOTP(value)}
+                      onChange={(value: string) => setOTP(value)}
                       maxLength={6}
                       render={({ slots }) => (
                         <InputOTPGroup className="gap-2">
