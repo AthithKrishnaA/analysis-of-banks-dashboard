@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,6 +15,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 // Define the available user types
 const userTypes = [
@@ -32,6 +36,9 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [showOTPInput, setShowOTPInput] = useState(false);
+  const [otp, setOTP] = useState('');
+  const [otpSecret, setOtpSecret] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -89,9 +96,9 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // First, generate OTP for verification
+      const { data: otpData, error: otpError } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
           data: {
             full_name: fullName,
@@ -99,19 +106,45 @@ const Auth = () => {
         },
       });
 
+      if (otpError) throw otpError;
+
+      setShowOTPInput(true);
+      toast({
+        title: "OTP Sent",
+        description: "Please check your email for the verification code.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOTPVerification = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: 'signup'
+      });
+
       if (error) throw error;
 
-      // Store the user ID for the next step
+      // If verification successful, proceed with sign up
       if (data.user) {
         setSelectedUserId(data.user.id);
-        // Show the user type selection modal
         setShowUserTypeModal(true);
+        setShowOTPInput(false);
+        toast({
+          title: "Success!",
+          description: "Email verified successfully. Please select your user type.",
+        });
       }
-
-      toast({
-        title: "Success!",
-        description: "Successfully signed up! Please select your user type.",
-      });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -250,30 +283,41 @@ const Auth = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
-                        required
+                  {showOTPInput ? (
+                    <div className="space-y-4">
+                      <Label>Enter verification code</Label>
+                      <InputOTP
+                        value={otp}
+                        onChange={(value) => setOTP(value)}
+                        maxLength={6}
+                        render={({ slots }) => (
+                          <InputOTPGroup className="gap-2">
+                            {slots.map((slot, index) => (
+                              <InputOTPSlot key={index} {...slot} />
+                            ))}
+                          </InputOTPGroup>
+                        )}
                       />
+                      <Button 
+                        type="button"
+                        onClick={handleOTPVerification}
+                        className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                        disabled={loading || otp.length !== 6}
+                      >
+                        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Verify Code
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                    disabled={loading}
-                  >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Sign Up
-                  </Button>
+                  ) : (
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Send Verification Code
+                    </Button>
+                  )}
                 </form>
               </TabsContent>
             </Tabs>
