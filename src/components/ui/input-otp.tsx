@@ -52,6 +52,8 @@ const InputOTPSlot = React.forwardRef<
         className
       )}
       {...props}
+      data-active={isActive ? "true" : undefined}
+      data-fake-caret={hasFakeCaret ? "true" : undefined}
     >
       {char}
       {hasFakeCaret && (

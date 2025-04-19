@@ -39,6 +39,7 @@ const Auth = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [showOTPInput, setShowOTPInput] = useState(false);
   const [otp, setOTP] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -102,16 +103,18 @@ const Auth = () => {
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: `${window.location.origin}/auth`,
         },
       });
 
       if (signUpError) throw signUpError;
-
+      
       // Then send a one-time password to the email for verification
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/auth`,
         }
       });
 
@@ -134,7 +137,7 @@ const Auth = () => {
   };
 
   const handleOTPVerification = async () => {
-    setLoading(true);
+    setOtpLoading(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({
         email,
@@ -160,7 +163,35 @@ const Auth = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setOtpLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/auth`,
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Code Resent",
+        description: "A new verification code has been sent to your email.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -339,28 +370,50 @@ const Auth = () => {
                   </form>
                 ) : (
                   <div className="space-y-4">
-                    <Label>Enter verification code sent to {email}</Label>
-                    <InputOTP
-                      value={otp}
-                      onChange={(value: string) => setOTP(value)}
-                      maxLength={6}
-                      render={({ slots }) => (
-                        <InputOTPGroup className="gap-2">
-                          {slots.map((slot, idx) => (
-                            <InputOTPSlot key={idx} {...slot} index={idx} />
-                          ))}
-                        </InputOTPGroup>
-                      )}
-                    />
-                    <Button 
-                      type="button"
-                      onClick={handleOTPVerification}
-                      className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                      disabled={loading || otp.length !== 6}
-                    >
-                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Verify Code
-                    </Button>
+                    <Label className="block mb-2">Enter verification code sent to {email}</Label>
+                    <div className="mb-6">
+                      <InputOTP
+                        value={otp}
+                        onChange={(value: string) => setOTP(value)}
+                        maxLength={6}
+                        render={({ slots }) => (
+                          <InputOTPGroup className="gap-2 justify-center">
+                            {slots.map((slot, idx) => (
+                              <InputOTPSlot key={idx} {...slot} index={idx} className="w-12 h-12 text-lg" />
+                            ))}
+                          </InputOTPGroup>
+                        )}
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <Button 
+                        type="button"
+                        onClick={handleOTPVerification}
+                        className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                        disabled={otpLoading || otp.length !== 6}
+                      >
+                        {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Verify Code
+                      </Button>
+                      <Button 
+                        type="button"
+                        onClick={handleResendOTP}
+                        variant="outline"
+                        className="w-full"
+                        disabled={otpLoading}
+                      >
+                        {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Resend Code
+                      </Button>
+                      <Button 
+                        type="button"
+                        onClick={() => setShowOTPInput(false)}
+                        variant="link"
+                        className="w-full text-gray-500"
+                      >
+                        Back to Signup
+                      </Button>
+                    </div>
                   </div>
                 )}
               </TabsContent>
