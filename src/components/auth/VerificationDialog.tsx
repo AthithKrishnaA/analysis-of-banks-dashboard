@@ -53,8 +53,7 @@ const VerificationDialog = ({
                 <InputOTPGroup className="gap-2 justify-center">
                   {slots.map((slot, idx) => (
                     <InputOTPSlot 
-                      key={idx} 
-                      {...slot} 
+                      key={idx}
                       index={idx}
                       className="w-12 h-12 text-lg bg-transparent border-gray-700 text-white"
                     />

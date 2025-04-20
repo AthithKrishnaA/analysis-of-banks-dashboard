@@ -34,10 +34,10 @@ const InputOTPSlot = React.forwardRef<
   const inputOTPContext = React.useContext(OTPInputContext)
   const slot = inputOTPContext?.slots?.[index]
   
-  // Safely access the properties with fallbacks
+  // Get values safely
   const char = slot?.char || ""
-  const hasFakeCaret = !!slot?.hasFakeCaret
-  const isActive = !!slot?.isActive
+  const hasFakeCaret = slot?.hasFakeCaret || false
+  const isActive = slot?.isActive || false
 
   return (
     <div
