@@ -102,14 +102,33 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
-      if (signUpData.user) {
-        setSelectedUserId(signUpData.user.id);
-        setShowUserTypeModal(true);
-        toast({
-          title: "Success!",
-          description: "Your account has been created successfully.",
-        });
-      }
+      // Generate a proper 6-digit OTP code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("Generated OTP code:", verificationCode); // For testing purposes
+
+      // Send OTP email using Supabase
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser: false,
+          data: {
+            verification_code: verificationCode,
+          }
+        }
+      });
+
+      if (otpError) throw otpError;
+
+      // Store the verification code for validation
+      localStorage.setItem('verification_code', verificationCode);
+      
+      setShowOTPInput(true);
+      setOTP('');
+      
+      toast({
+        title: "Verification Code Sent",
+        description: "Please check your email for the 6-digit verification code.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
