@@ -47,7 +47,7 @@ const VerificationDialog = ({
             <label className="text-sm text-gray-400">Verification Code</label>
             <InputOTP
               value={otp}
-              onChange={(value) => setOTP(value)}
+              onChange={setOTP}
               maxLength={6}
               render={({ slots }) => (
                 <InputOTPGroup className="gap-2 justify-center">

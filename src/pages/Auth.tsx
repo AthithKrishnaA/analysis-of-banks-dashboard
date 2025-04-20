@@ -15,11 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
 import VerificationDialog from "@/components/auth/VerificationDialog";
 
 const userTypes = [
@@ -95,7 +90,6 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      // First create the user
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -103,23 +97,31 @@ const Auth = () => {
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/auth/verify`,
         },
       });
 
       if (signUpError) throw signUpError;
 
-      // Then send OTP
+      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("Generated OTP code:", randomCode);
+
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
+          data: {
+            verification_code: randomCode,
+          }
         }
       });
 
       if (otpError) throw otpError;
 
+      localStorage.setItem('verification_code', randomCode);
+      
       setShowOTPInput(true);
+      setOTP('');
+      
       toast({
         title: "Verification Code Sent",
         description: "Please check your email for the 6-digit verification code.",
@@ -138,22 +140,29 @@ const Auth = () => {
   const handleOTPVerification = async () => {
     setOtpLoading(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'email'
-      });
-
-      if (error) throw error;
-
-      if (data.user) {
-        setSelectedUserId(data.user.id);
-        setShowUserTypeModal(true);
-        setShowOTPInput(false);
-        toast({
-          title: "Email Verified!",
-          description: "Your email has been verified. Now please select your user type.",
+      const storedCode = localStorage.getItem('verification_code');
+      
+      if (otp === storedCode) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
+
+        if (error) throw error;
+
+        if (data.user) {
+          setSelectedUserId(data.user.id);
+          setShowUserTypeModal(true);
+          setShowOTPInput(false);
+          localStorage.removeItem('verification_code');
+          
+          toast({
+            title: "Email Verified!",
+            description: "Your email has been verified. Now please select your user type.",
+          });
+        }
+      } else {
+        throw new Error("Invalid verification code. Please try again.");
       }
     } catch (error: any) {
       toast({
@@ -169,15 +178,22 @@ const Auth = () => {
   const handleResendOTP = async () => {
     setOtpLoading(true);
     try {
+      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("New OTP code:", randomCode);
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/auth`,
+          data: {
+            verification_code: randomCode,
+          }
         }
       });
 
       if (error) throw error;
+
+      localStorage.setItem('verification_code', randomCode);
 
       toast({
         title: "Code Resent",
