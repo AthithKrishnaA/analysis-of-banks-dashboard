@@ -39,7 +39,7 @@ const VerificationDialog = ({
         <div className="text-center space-y-2">
           <p className="text-sm text-gray-400">We've sent a verification code to</p>
           <p className="text-sm text-white font-medium">{email}</p>
-          <p className="text-xs text-gray-400">Enter the code to verify your account</p>
+          <p className="text-xs text-gray-400">Enter the 6-digit verification code</p>
         </div>
         
         <div className="space-y-4">
@@ -55,6 +55,7 @@ const VerificationDialog = ({
                     <InputOTPSlot 
                       key={idx}
                       index={idx}
+                      {...slot}
                       className="w-12 h-12 text-lg bg-transparent border-gray-700 text-white"
                     />
                   ))}

@@ -102,22 +102,25 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
-      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log("Generated OTP code:", randomCode);
+      // Generate a proper 6-digit OTP code
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      console.log("Generated OTP code:", verificationCode); // For testing purposes
 
+      // Send OTP email using Supabase
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
           data: {
-            verification_code: randomCode,
+            verification_code: verificationCode,
           }
         }
       });
 
       if (otpError) throw otpError;
 
-      localStorage.setItem('verification_code', randomCode);
+      // Store the verification code for validation
+      localStorage.setItem('verification_code', verificationCode);
       
       setShowOTPInput(true);
       setOTP('');
