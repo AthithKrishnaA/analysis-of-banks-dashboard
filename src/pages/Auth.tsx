@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +20,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import VerificationDialog from "@/components/auth/VerificationDialog";
 
 const userTypes = [
   { id: 'student', label: 'Student', icon: School, description: 'Access student-focused banking products and educational resources' },
@@ -95,7 +95,7 @@ const Auth = () => {
     setLoading(true);
     
     try {
-      // First create the user with email and password
+      // First create the user
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -103,18 +103,17 @@ const Auth = () => {
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/auth`,
+          emailRedirectTo: `${window.location.origin}/auth/verify`,
         },
       });
 
       if (signUpError) throw signUpError;
-      
-      // Then send a one-time password to the email for verification
+
+      // Then send OTP
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
-          emailRedirectTo: `${window.location.origin}/auth`,
         }
       });
 
@@ -123,7 +122,7 @@ const Auth = () => {
       setShowOTPInput(true);
       toast({
         title: "Verification Code Sent",
-        description: "Please check your email for the verification code. Enter it below to complete your signup.",
+        description: "Please check your email for the 6-digit verification code.",
       });
     } catch (error: any) {
       toast({
@@ -224,76 +223,86 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50 p-4">
-      <div className="w-full max-w-md relative">
-        <div className="absolute -top-4 -left-4 w-20 h-20 bg-purple-200 rounded-full filter blur-xl opacity-70"></div>
-        <div className="absolute -bottom-8 -right-4 w-28 h-28 bg-blue-200 rounded-full filter blur-xl opacity-70"></div>
-        
-        <Card className="w-full backdrop-blur-sm bg-white/90 border border-gray-100 shadow-xl">
-          <CardHeader className="space-y-1 text-center">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 text-transparent bg-clip-text">Welcome</CardTitle>
-            <CardDescription className="text-gray-500">
-              Sign in or sign up to access your banking dashboard
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="signin" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
-                  Sign In
-                </TabsTrigger>
-                <TabsTrigger value="signup" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
-                  Sign Up
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="name@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="password"
-                        type="password"
-                        placeholder="Enter your password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                    disabled={loading}
-                  >
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
+      {showOTPInput ? (
+        <VerificationDialog
+          email={email}
+          otp={otp}
+          setOTP={setOTP}
+          onVerify={handleOTPVerification}
+          onResend={handleResendOTP}
+          onBack={() => setShowOTPInput(false)}
+          loading={otpLoading}
+        />
+      ) : (
+        <div className="w-full max-w-md relative">
+          <div className="absolute -top-4 -left-4 w-20 h-20 bg-purple-200 rounded-full filter blur-xl opacity-70"></div>
+          <div className="absolute -bottom-8 -right-4 w-28 h-28 bg-blue-200 rounded-full filter blur-xl opacity-70"></div>
+          
+          <Card className="w-full backdrop-blur-sm bg-white/90 border border-gray-100 shadow-xl">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 text-transparent bg-clip-text">Welcome</CardTitle>
+              <CardDescription className="text-gray-500">
+                Sign in or sign up to access your banking dashboard
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="signin" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="signin" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
                     Sign In
-                  </Button>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="signup">
-                {!showOTPInput ? (
+                  </TabsTrigger>
+                  <TabsTrigger value="signup" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-blue-500 data-[state=active]:text-white">
+                    Sign Up
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="signin">
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="name@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          id="password"
+                          type="password"
+                          placeholder="Enter your password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pl-10"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      Sign In
+                    </Button>
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="fullName">Full Name</Label>
@@ -368,59 +377,12 @@ const Auth = () => {
                       Send Verification Code
                     </Button>
                   </form>
-                ) : (
-                  <div className="space-y-4">
-                    <Label className="block mb-2">Enter verification code sent to {email}</Label>
-                    <div className="mb-6">
-                      <InputOTP
-                        value={otp}
-                        onChange={(value: string) => setOTP(value)}
-                        maxLength={6}
-                        render={({ slots }) => (
-                          <InputOTPGroup className="gap-2 justify-center">
-                            {slots.map((slot, idx) => (
-                              <InputOTPSlot key={idx} {...slot} index={idx} className="w-12 h-12 text-lg" />
-                            ))}
-                          </InputOTPGroup>
-                        )}
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <Button 
-                        type="button"
-                        onClick={handleOTPVerification}
-                        className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
-                        disabled={otpLoading || otp.length !== 6}
-                      >
-                        {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Verify Code
-                      </Button>
-                      <Button 
-                        type="button"
-                        onClick={handleResendOTP}
-                        variant="outline"
-                        className="w-full"
-                        disabled={otpLoading}
-                      >
-                        {otpLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Resend Code
-                      </Button>
-                      <Button 
-                        type="button"
-                        onClick={() => setShowOTPInput(false)}
-                        variant="link"
-                        className="w-full text-gray-500"
-                      >
-                        Back to Signup
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <Dialog open={showUserTypeModal} onOpenChange={setShowUserTypeModal}>
         <DialogContent className="sm:max-w-md">

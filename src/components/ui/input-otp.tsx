@@ -1,8 +1,6 @@
 
 import * as React from "react"
 import { OTPInput, OTPInputContext } from "input-otp"
-import { Dot } from "lucide-react"
-
 import { cn } from "@/lib/utils"
 
 const InputOTP = React.forwardRef<
@@ -12,7 +10,7 @@ const InputOTP = React.forwardRef<
   <OTPInput
     ref={ref}
     containerClassName={cn(
-      "flex items-center gap-2 has-[:disabled]:opacity-50",
+      "flex items-center gap-2",
       containerClassName
     )}
     className={cn("disabled:cursor-not-allowed", className)}
@@ -34,26 +32,18 @@ const InputOTPSlot = React.forwardRef<
   React.ComponentPropsWithoutRef<"div"> & { index: number }
 >(({ index, className, ...props }, ref) => {
   const inputOTPContext = React.useContext(OTPInputContext)
-  
-  // Make sure the context and slots exist, and provide default empty values if not
   const slot = inputOTPContext?.slots?.[index] || {}
-  const { char = '', hasFakeCaret = false, isActive = false } = slot as { 
-    char?: string; 
-    hasFakeCaret?: boolean; 
-    isActive?: boolean 
-  }
+  const { char, hasFakeCaret, isActive } = slot
 
   return (
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        isActive && "z-10 ring-2 ring-ring ring-offset-background",
+        "relative flex h-14 w-14 items-center justify-center rounded-md border text-lg transition-all",
+        isActive && "ring-2 ring-offset-2 ring-offset-background",
         className
       )}
       {...props}
-      data-active={isActive ? "true" : undefined}
-      data-fake-caret={hasFakeCaret ? "true" : undefined}
     >
       {char}
       {hasFakeCaret && (
@@ -66,14 +56,4 @@ const InputOTPSlot = React.forwardRef<
 })
 InputOTPSlot.displayName = "InputOTPSlot"
 
-const InputOTPSeparator = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div">
->(({ ...props }, ref) => (
-  <div ref={ref} role="separator" {...props}>
-    <Dot />
-  </div>
-))
-InputOTPSeparator.displayName = "InputOTPSeparator"
-
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export { InputOTP, InputOTPGroup, InputOTPSlot }
