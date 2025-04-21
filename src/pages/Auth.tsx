@@ -77,7 +77,7 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (password !== confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -86,9 +86,9 @@ const Auth = () => {
       });
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -102,11 +102,9 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
-      // Generate a proper 6-digit OTP code
       const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log("Generated OTP code:", verificationCode); // For testing purposes
+      console.log("Generated OTP code:", verificationCode);
 
-      // Send OTP email using Supabase
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -119,12 +117,11 @@ const Auth = () => {
 
       if (otpError) throw otpError;
 
-      // Store the verification code for validation
       localStorage.setItem('verification_code', verificationCode);
-      
+
       setShowOTPInput(true);
       setOTP('');
-      
+
       toast({
         title: "Verification Code Sent",
         description: "Please check your email for the 6-digit verification code.",
@@ -140,42 +137,11 @@ const Auth = () => {
     }
   };
 
-  const handleOTPVerification = async () => {
-    setOtpLoading(true);
-    try {
-      const storedCode = localStorage.getItem('verification_code');
-      
-      if (otp === storedCode) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) throw error;
-
-        if (data.user) {
-          setSelectedUserId(data.user.id);
-          setShowUserTypeModal(true);
-          setShowOTPInput(false);
-          localStorage.removeItem('verification_code');
-          
-          toast({
-            title: "Email Verified!",
-            description: "Your email has been verified. Now please select your user type.",
-          });
-        }
-      } else {
-        throw new Error("Invalid verification code. Please try again.");
-      }
-    } catch (error: any) {
-      toast({
-        title: "Verification Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setOtpLoading(false);
-    }
+  const handleOTPVerification = () => {
+    toast({
+      title: "Verification",
+      description: "Please check your email for verification.",
+    });
   };
 
   const handleResendOTP = async () => {
@@ -216,7 +182,7 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
