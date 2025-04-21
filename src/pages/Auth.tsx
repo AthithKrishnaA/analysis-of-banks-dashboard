@@ -16,7 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-// Removed import of VerificationDialog
 
 const userTypes = [
   { id: 'student', label: 'Student', icon: School, description: 'Access student-focused banking products and educational resources' },
@@ -88,7 +87,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // Just use the default Supabase signUp which sends a verification link
+      // Use default Supabase signUp which sends a verification link to email
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -101,7 +100,6 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
-      // After sign up, show UI prompting user to check email (no OTP, no custom code handling)
       setHasRequestedVerification(true);
 
       toast({
@@ -148,9 +146,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        backgroundImage: 'url("/lovable-uploads/2be88b4a-36cd-4f33-97bf-b79268f74224.png")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       {hasRequestedVerification ? (
-        <Card className="w-[400px] bg-black text-white border-gray-800">
+        <Card className="w-[400px] bg-black text-white border-gray-800 bg-opacity-90 backdrop-blur-sm">
           <CardHeader className="space-y-1 text-center">
             <CardTitle className="text-2xl text-white">Verify Your Email</CardTitle>
           </CardHeader>
@@ -170,13 +176,11 @@ const Auth = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="w-full max-w-md relative">
-          <div className="absolute -top-4 -left-4 w-20 h-20 bg-purple-200 rounded-full filter blur-xl opacity-70"></div>
-          <div className="absolute -bottom-8 -right-4 w-28 h-28 bg-blue-200 rounded-full filter blur-xl opacity-70"></div>
-          <Card className="w-full backdrop-blur-sm bg-white/90 border border-gray-100 shadow-xl">
+        <div className="w-full max-w-md relative bg-black bg-opacity-60 rounded-lg backdrop-blur-md p-6">
+          <Card className="w-full bg-transparent border-0 shadow-none">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 text-transparent bg-clip-text">Welcome</CardTitle>
-              <CardDescription className="text-gray-500">
+              <CardDescription className="text-gray-300">
                 Sign in or sign up to access your banking dashboard
               </CardDescription>
             </CardHeader>
@@ -352,3 +356,4 @@ const Auth = () => {
 };
 
 export default Auth;
+
