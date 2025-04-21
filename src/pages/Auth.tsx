@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import VerificationDialog from "@/components/auth/VerificationDialog";
+// Removed import of VerificationDialog
 
 const userTypes = [
   { id: 'student', label: 'Student', icon: School, description: 'Access student-focused banking products and educational resources' },
@@ -32,9 +33,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showUserTypeModal, setShowUserTypeModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [showOTPInput, setShowOTPInput] = useState(false);
-  const [otp, setOTP] = useState('');
-  const [otpLoading, setOtpLoading] = useState(false);
+  const [hasRequestedVerification, setHasRequestedVerification] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -48,7 +47,6 @@ const Auth = () => {
 
   const handleUserTypeSelection = async (userType: string) => {
     if (!selectedUserId) return;
-    
     setLoading(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -90,6 +88,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Just use the default Supabase signUp which sends a verification link
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -102,29 +101,12 @@ const Auth = () => {
 
       if (signUpError) throw signUpError;
 
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log("Generated OTP code:", verificationCode);
-
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-          data: {
-            verification_code: verificationCode,
-          }
-        }
-      });
-
-      if (otpError) throw otpError;
-
-      localStorage.setItem('verification_code', verificationCode);
-
-      setShowOTPInput(true);
-      setOTP('');
+      // After sign up, show UI prompting user to check email (no OTP, no custom code handling)
+      setHasRequestedVerification(true);
 
       toast({
-        title: "Verification Code Sent",
-        description: "Please check your email for the 6-digit verification code.",
+        title: "Verify Your Email",
+        description: "Check your registered mail id for verification.",
       });
     } catch (error: any) {
       toast({
@@ -134,48 +116,6 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleOTPVerification = () => {
-    toast({
-      title: "Verification",
-      description: "Please check your email for verification.",
-    });
-  };
-
-  const handleResendOTP = async () => {
-    setOtpLoading(true);
-    try {
-      const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-      console.log("New OTP code:", randomCode);
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-          data: {
-            verification_code: randomCode,
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      localStorage.setItem('verification_code', randomCode);
-
-      toast({
-        title: "Code Resent",
-        description: "A new verification code has been sent to your email.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    } finally {
-      setOtpLoading(false);
     }
   };
 
@@ -209,21 +149,30 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
-      {showOTPInput ? (
-        <VerificationDialog
-          email={email}
-          otp={otp}
-          setOTP={setOTP}
-          onVerify={handleOTPVerification}
-          onResend={handleResendOTP}
-          onBack={() => setShowOTPInput(false)}
-          loading={otpLoading}
-        />
+      {hasRequestedVerification ? (
+        <Card className="w-[400px] bg-black text-white border-gray-800">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl text-white">Verify Your Email</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 pt-2 pb-6">
+            <div className="text-center space-y-2">
+              <p className="text-base text-gray-400">
+                We've sent a verification link to your email:
+              </p>
+              <p className="text-lg text-white font-medium">{email}</p>
+              <p className="text-base text-gray-400">
+                Please check your registered mail id for verification and follow the instructions in your inbox.
+              </p>
+            </div>
+            <Button className="w-full mt-4" onClick={() => setHasRequestedVerification(false)}>
+              Back to Sign Up
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <div className="w-full max-w-md relative">
           <div className="absolute -top-4 -left-4 w-20 h-20 bg-purple-200 rounded-full filter blur-xl opacity-70"></div>
           <div className="absolute -bottom-8 -right-4 w-28 h-28 bg-blue-200 rounded-full filter blur-xl opacity-70"></div>
-          
           <Card className="w-full backdrop-blur-sm bg-white/90 border border-gray-100 shadow-xl">
             <CardHeader className="space-y-1 text-center">
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-violet-500 to-blue-500 text-transparent bg-clip-text">Welcome</CardTitle>
@@ -241,7 +190,7 @@ const Auth = () => {
                     Sign Up
                   </TabsTrigger>
                 </TabsList>
-                
+
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
@@ -275,7 +224,7 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <Button 
                       type="submit" 
                       className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
@@ -286,7 +235,7 @@ const Auth = () => {
                     </Button>
                   </form>
                 </TabsContent>
-                
+
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
@@ -304,7 +253,7 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="signup-email">Email</Label>
                       <div className="relative">
@@ -320,7 +269,7 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <div className="relative">
@@ -336,7 +285,7 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm Password</Label>
                       <div className="relative">
@@ -352,14 +301,14 @@ const Auth = () => {
                         />
                       </div>
                     </div>
-                    
+
                     <Button 
                       type="submit" 
                       className="w-full bg-gradient-to-r from-violet-500 to-blue-500 hover:from-violet-600 hover:to-blue-600 text-white transition-all duration-200 shadow-md hover:shadow-lg"
                       disabled={loading}
                     >
                       {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                      Send Verification Code
+                      Sign Up
                     </Button>
                   </form>
                 </TabsContent>
@@ -377,7 +326,6 @@ const Auth = () => {
               Select your user type to personalize your banking experience
             </DialogDescription>
           </DialogHeader>
-          
           <div className="grid grid-cols-1 gap-4 py-4">
             {userTypes.map(type => (
               <Button
