@@ -59,6 +59,17 @@ const InteractiveBankFeatures = ({
     }
   };
 
+  const getNewsUrl = (bank: string) => {
+    // Default to moneycontrol URL for SBI or if no specific URL is available
+    if (bank === 'SBIN.NS' || !bankWebsites[bank]) {
+      return "https://www.moneycontrol.com/news/tags/sbi.html#google_vignette";
+    }
+    
+    // For other banks, format the URL using the bank's name
+    const bankName = bank.split('.')[0].toLowerCase();
+    return `https://www.moneycontrol.com/news/tags/${bankName}.html`;
+  };
+
   return (
     <>
       {showLoanCalculator && (
@@ -218,9 +229,19 @@ const InteractiveBankFeatures = ({
                           <p className="text-xs text-blue-600 mt-2">
                             For the complete news, visit the {selectedBank.split('.')[0]} website.
                           </p>
+                          <a 
+                            href={getNewsUrl(selectedBank)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-blue-700 mt-2 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span>Visit full news section</span>
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
                         </div>
                       ),
-                      duration: 4000,
+                      duration: 5000,
                     });
                   }}>
                     <TableCell className="font-medium">{item.title}</TableCell>
