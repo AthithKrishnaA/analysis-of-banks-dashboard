@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -48,26 +49,32 @@ const InteractiveBankFeatures = ({
 
   const visitBankWebsite = () => {
     if (bankWebsites[selectedBank]) {
-      const newsUrl = `${bankWebsites[selectedBank]}news`;
+      const newsUrl = getNewsUrl(selectedBank);
       window.open(newsUrl, '_blank', 'noopener,noreferrer');
       
       toast({
         title: "Visiting Bank Website",
-        description: `Opening ${bankWebsites[selectedBank]} news section in a new tab`,
+        description: `Opening ${selectedBank.split('.')[0]} news section in a new tab`,
         duration: 3000,
       });
     }
   };
 
   const getNewsUrl = (bank: string) => {
-    // Default to moneycontrol URL for SBI or if no specific URL is available
-    if (bank === 'SBIN.NS' || !bankWebsites[bank]) {
-      return "https://www.moneycontrol.com/news/tags/sbi.html#google_vignette";
+    // Return specific URLs for each bank
+    switch (bank) {
+      case 'AXISBANK.NS':
+        return "https://www.axisbank.com/about-us/press-releases";
+      case 'ICICIBANK.NS':
+        return "https://www.icicibank.com/about-us/in-the-news";
+      case 'HDFCBANK.NS':
+        return "https://www.hdfcbank.com/personal/about-us/news-room";
+      case 'KOTAKBANK.NS':
+        return "https://www.moneycontrol.com/news/tags/kotak-mahindra-bank.html";
+      case 'SBIN.NS':
+      default:
+        return "https://www.moneycontrol.com/news/tags/sbi.html#google_vignette";
     }
-    
-    // For other banks, format the URL using the bank's name
-    const bankName = bank.split('.')[0].toLowerCase();
-    return `https://www.moneycontrol.com/news/tags/${bankName}.html`;
   };
 
   return (
@@ -208,8 +215,17 @@ const InteractiveBankFeatures = ({
             </Button>
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">
-            <div className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+            <div className="text-xs text-gray-500 flex items-center justify-between mb-3">
               <span>News is updated daily. Visit bank website for more updates.</span>
+              <a 
+                href={getNewsUrl(selectedBank)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                <span>{selectedBank.split('.')[0]} News</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
             </div>
             <Table>
               <TableHeader>
