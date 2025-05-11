@@ -215,16 +215,20 @@ const InteractiveBankFeatures = ({
             </Button>
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">
-            <div className="text-xs text-gray-500 flex items-center justify-between mb-3">
-              <span>News is updated daily. Visit bank website for more updates.</span>
+            <div className="mb-5">
+              <div className="text-xs text-gray-500 flex items-center justify-between mb-1">
+                <span>News is updated daily. Visit bank website for more updates.</span>
+                <Calendar className="h-3 w-3" />
+              </div>
               <a 
                 href={getNewsUrl(selectedBank)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline p-2 bg-blue-50 rounded-md w-full justify-center mb-3"
               >
-                <span>{selectedBank.split('.')[0]} News</span>
-                <ExternalLink className="h-3 w-3" />
+                <span>{selectedBank.split('.')[0]} News Portal:</span>
+                <span className="text-xs truncate max-w-[180px]">{getNewsUrl(selectedBank)}</span>
+                <ExternalLink className="h-3 w-3 ml-1 flex-shrink-0" />
               </a>
             </div>
             <Table>
