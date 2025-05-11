@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
@@ -9,6 +8,7 @@ import CreditCardOptions from './CreditCardOptions';
 import RateAlertForm from './RateAlertForm';
 import MarketCalendar from './MarketCalendar';
 import { bankWebsites } from '@/hooks/useStockData';
+import { Button } from "@/components/ui/button";
 
 interface InteractiveBankFeaturesProps {
   selectedBank: string;
@@ -181,18 +181,20 @@ const InteractiveBankFeatures = ({
         </Card>
         
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="flex items-center gap-2">
               <NewspaperIcon className="h-5 w-5 text-blue-600" />
               Recent Bank News
             </CardTitle>
-            <button 
+            <Button 
               onClick={visitBankWebsite}
-              className="text-xs flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1.5 rounded-full transition-colors"
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-300"
             >
               <span>Visit Full News</span>
-              <ExternalLink className="h-3 w-3" />
-            </button>
+              <ExternalLink className="h-3.5 w-3.5 ml-1" />
+            </Button>
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">
             <div className="text-xs text-gray-500 flex items-center gap-1 mb-3">
