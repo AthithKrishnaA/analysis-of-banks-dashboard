@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard, Calendar } from 'lucide-react';
+import { Zap, Bell, NewspaperIcon, LineChart, Percent, CreditCard, Calendar, ExternalLink } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import LoanCalculator from './LoanCalculator';
 import CreditCardOptions from './CreditCardOptions';
 import RateAlertForm from './RateAlertForm';
 import MarketCalendar from './MarketCalendar';
+import { bankWebsites } from '@/hooks/useStockData';
 
 interface InteractiveBankFeaturesProps {
   selectedBank: string;
@@ -43,6 +44,19 @@ const InteractiveBankFeatures = ({
 
   const handleInterestRateAlert = () => {
     setShowRateAlertForm(true);
+  };
+
+  const visitBankWebsite = () => {
+    if (bankWebsites[selectedBank]) {
+      const newsUrl = `${bankWebsites[selectedBank]}news`;
+      window.open(newsUrl, '_blank', 'noopener,noreferrer');
+      
+      toast({
+        title: "Visiting Bank Website",
+        description: `Opening ${bankWebsites[selectedBank]} news section in a new tab`,
+        duration: 3000,
+      });
+    }
   };
 
   return (
@@ -167,13 +181,23 @@ const InteractiveBankFeatures = ({
         </Card>
         
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <NewspaperIcon className="h-5 w-5 text-blue-600" />
               Recent Bank News
             </CardTitle>
+            <button 
+              onClick={visitBankWebsite}
+              className="text-xs flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <span>Visit Full News</span>
+              <ExternalLink className="h-3 w-3" />
+            </button>
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">
+            <div className="text-xs text-gray-500 flex items-center gap-1 mb-3">
+              <span>News is updated daily. Visit bank website for more updates.</span>
+            </div>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -186,8 +210,15 @@ const InteractiveBankFeatures = ({
                   <TableRow key={index} className="cursor-pointer hover:bg-gray-50" onClick={() => {
                     toast({
                       title: item.title,
-                      description: item.summary,
-                      duration: 3000,
+                      description: (
+                        <div>
+                          <p>{item.summary}</p>
+                          <p className="text-xs text-blue-600 mt-2">
+                            For the complete news, visit the {selectedBank.split('.')[0]} website.
+                          </p>
+                        </div>
+                      ),
+                      duration: 4000,
                     });
                   }}>
                     <TableCell className="font-medium">{item.title}</TableCell>
