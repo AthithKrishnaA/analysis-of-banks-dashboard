@@ -216,10 +216,6 @@ const InteractiveBankFeatures = ({
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">
             <div className="mb-5">
-              <div className="text-xs text-gray-500 flex items-center justify-between mb-1">
-                <span>News is updated daily. Visit bank website for more updates.</span>
-                <Calendar className="h-3 w-3" />
-              </div>
               <a 
                 href={getNewsUrl(selectedBank)}
                 target="_blank"
