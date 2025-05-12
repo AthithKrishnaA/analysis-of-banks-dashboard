@@ -38,11 +38,11 @@ const INDIAN_MARKET_HOLIDAYS_2025 = [
 ];
 
 const baseValues = {
-  'SBIN.NS': 778.10,
-  'AXISBANK.NS': 1013.00,
-  'HDFCBANK.NS': 1714.00,
-  'KOTAKBANK.NS': 1910.00,
-  'ICICIBANK.NS': 1267.00
+  'SBIN.NS': 802.00,
+  'AXISBANK.NS': 1200.00,
+  'HDFCBANK.NS': 1953.00,
+  'KOTAKBANK.NS': 2135.00,
+  'ICICIBANK.NS': 1440.00
 };
 
 // Bank website URLs for credit card offers and other products

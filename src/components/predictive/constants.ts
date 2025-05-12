@@ -1,4 +1,3 @@
-
 export const bankColors = {
   'HDFC Bank': '#1A1F2C',      // Dark navy blue
   'State Bank of India': '#403E43',  // Dark charcoal
@@ -16,11 +15,11 @@ export const bankSymbolToName: { [key: string]: string } = {
 };
 
 export const baseValues = {
-  'HDFC Bank': 1714.00,
-  'State Bank of India': 778.10,
-  'ICICI Bank': 1267.00,
-  'Axis Bank': 1013.00,
-  'Kotak Bank': 1910.00
+  'HDFC Bank': 1953.00,
+  'State Bank of India': 802.00,
+  'ICICI Bank': 1440.00,
+  'Axis Bank': 1200.00,
+  'Kotak Bank': 2135.00
 };
 
 // Bank website URLs
