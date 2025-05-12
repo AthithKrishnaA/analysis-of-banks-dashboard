@@ -208,10 +208,9 @@ const InteractiveBankFeatures = ({
               onClick={visitBankWebsite}
               variant="outline"
               size="sm"
-              className="flex items-center gap-1 bg-blue-100 hover:bg-blue-200 text-blue-800 border-blue-300"
+              className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white border-blue-300"
             >
-              <span>Visit Full News</span>
-              <ExternalLink className="h-3.5 w-3.5 ml-1" />
+              Visit Full News <ExternalLink className="h-3.5 w-3.5 ml-1" />
             </Button>
           </CardHeader>
           <CardContent className="max-h-[300px] overflow-y-auto">

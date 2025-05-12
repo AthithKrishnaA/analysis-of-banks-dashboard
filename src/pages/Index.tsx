@@ -40,6 +40,7 @@ import {
   ArrowDown,
   Minus
 } from 'lucide-react';
+import ExternalLink from '../components/ExternalLink';
 
 const bankMetricsData = {
   'SBIN.NS': {
@@ -202,6 +203,29 @@ const Index = () => {
     }
   };
 
+  const getNewsUrl = (bank: string) => {
+    switch (bank) {
+      case 'AXISBANK.NS':
+        return "https://www.axisbank.com/about-us/press-releases";
+      case 'ICICIBANK.NS':
+        return "https://www.icicibank.com/about-us/in-the-news";
+      case 'HDFCBANK.NS':
+        return "https://www.hdfcbank.com/personal/about-us/news-room";
+      case 'KOTAKBANK.NS':
+        return "https://www.moneycontrol.com/news/tags/kotak-mahindra-bank.html";
+      case 'SBIN.NS':
+      default:
+        return "https://www.moneycontrol.com/news/tags/sbi.html#google_vignette";
+    }
+  };
+
+  const visitBankWebsite = () => {
+    if (bankWebsites[selectedBank]) {
+      const newsUrl = getNewsUrl(selectedBank);
+      window.open(newsUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -307,13 +331,28 @@ const Index = () => {
               <Newspaper className="h-5 w-5 text-blue-500" />
               Latest Bank News
             </CardTitle>
-            <div className="text-xs text-gray-500 flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              <span>Updated daily</span>
-            </div>
+            <Button 
+              onClick={visitBankWebsite}
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white border-blue-300"
+            >
+              Visit Full News <ExternalLink className="h-3.5 w-3.5 ml-1" />
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <a 
+                href={getNewsUrl(selectedBank)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 hover:underline p-2 bg-blue-50 rounded-md w-full justify-center mb-3"
+              >
+                <span>{selectedBank.split('.')[0]} News Portal:</span>
+                <span className="text-xs truncate max-w-[180px]">{getNewsUrl(selectedBank)}</span>
+                <ExternalLink className="h-3 w-3 ml-1 flex-shrink-0" />
+              </a>
+              
               {news && news.length > 0 ? (
                 news.map((item: BankNewsItem, index: number) => (
                   <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
@@ -336,6 +375,15 @@ const Index = () => {
                       </div>
                     </div>
                     <p className="text-sm text-gray-700 mt-2">{item.summary}</p>
+                    <a 
+                      href={getNewsUrl(selectedBank)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-xs text-blue-700 mt-2 hover:underline"
+                    >
+                      <span>Visit full news section</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
                   </div>
                 ))
               ) : (
